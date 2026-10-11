@@ -1,0 +1,41 @@
+lane-build: slot1, free 3.68 GB: lake build Challenge
+⚠ [8931/8932] Built Challenge (41s)
+warning: Challenge.lean:147:8: declaration uses `sorry`
+warning: Challenge.lean:151:8: declaration uses `sorry`
+warning: Challenge.lean:156:8: declaration uses `sorry`
+warning: Challenge.lean:161:8: declaration uses `sorry`
+warning: Challenge.lean:166:8: declaration uses `sorry`
+warning: Challenge.lean:170:8: declaration uses `sorry`
+warning: Challenge.lean:176:8: declaration uses `sorry`
+warning: Challenge.lean:181:8: declaration uses `sorry`
+warning: Challenge.lean:187:8: declaration uses `sorry`
+warning: Challenge.lean:192:8: declaration uses `sorry`
+warning: Challenge.lean:198:8: declaration uses `sorry`
+warning: Challenge.lean:203:8: declaration uses `sorry`
+warning: Challenge.lean:210:8: declaration uses `sorry`
+warning: Challenge.lean:217:8: declaration uses `sorry`
+warning: Challenge.lean:226:8: declaration uses `sorry`
+warning: Challenge.lean:231:8: declaration uses `sorry`
+warning: Challenge.lean:237:8: declaration uses `sorry`
+warning: Challenge.lean:242:8: declaration uses `sorry`
+warning: Challenge.lean:248:8: declaration uses `sorry`
+warning: Challenge.lean:256:8: declaration uses `sorry`
+warning: Challenge.lean:262:8: declaration uses `sorry`
+warning: Challenge.lean:268:8: declaration uses `sorry`
+warning: Challenge.lean:273:8: declaration uses `sorry`
+warning: Challenge.lean:281:8: declaration uses `sorry`
+warning: Challenge.lean:290:8: declaration uses `sorry`
+warning: Challenge.lean:301:8: declaration uses `sorry`
+warning: Challenge.lean:306:8: declaration uses `sorry`
+warning: Challenge.lean:312:8: declaration uses `sorry`
+warning: Challenge.lean:320:8: declaration uses `sorry`
+warning: Challenge.lean:328:8: declaration uses `sorry`
+warning: Challenge.lean:335:8: declaration uses `sorry`
+warning: Challenge.lean:344:8: declaration uses `sorry`
+warning: Challenge.lean:348:8: declaration uses `sorry`
+warning: Challenge.lean:354:8: declaration uses `sorry`
+warning: Challenge.lean:361:8: declaration uses `sorry`
+warning: Challenge.lean:369:8: declaration uses `sorry`
+Build completed successfully (8932 jobs).
+lane-build: exit 0
+EXIT 0

@@ -1,0 +1,12 @@
+module
+
+public import AugmentedDescartes.Defs
+public import AugmentedDescartes.Rows
+public import AugmentedDescartes.Lorentz
+public import AugmentedDescartes.Main
+public import AugmentedDescartes.Corollaries
+public import AugmentedDescartes.Converse
+public import AugmentedDescartes.Apollonian
+public import AugmentedDescartes.Base
+public import AugmentedDescartes.Transitivity
+public import AugmentedDescartes.Completion
