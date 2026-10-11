@@ -14,6 +14,60 @@ namespace AugmentedDescartes
 
 open Matrix
 
+/-! ### Sorry-free twins of the `Lorentz` facts this module uses (for the merge) -/
+
+theorem cmp_descartesQ_transpose (n : ℕ) : (descartesQ n)ᵀ = descartesQ n := by
+  ext i j
+  simp [descartesQ, Matrix.one_apply, eq_comm]
+
+theorem cmp_dotProduct_descartesQ_comm {n : ℕ} (u v : Fin (n + 2) → ℝ) :
+    u ⬝ᵥ (descartesQ n *ᵥ v) = v ⬝ᵥ (descartesQ n *ᵥ u) := by
+  rw [Matrix.dotProduct_mulVec, ← Matrix.mulVec_transpose, cmp_descartesQ_transpose, dotProduct_comm]
+
+theorem cmp_dotProduct_descartesQ {n : ℕ} (u v : Fin (n + 2) → ℝ) :
+    u ⬝ᵥ (descartesQ n *ᵥ v) = ∑ i, u i * v i - (n : ℝ)⁻¹ * ((∑ i, u i) * ∑ i, v i) := by
+  simp only [descartesQ, Matrix.sub_mulVec, Matrix.one_mulVec, Matrix.smul_mulVec, dotProduct_sub,
+    dotProduct_smul, smul_eq_mul]
+  simp only [dotProduct, Matrix.mulVec, Matrix.of_apply, one_mul, Finset.sum_mul, Finset.mul_sum]
+  congr 1
+  exact Finset.sum_comm
+
+theorem cmp_descartesQ_mul_inv {n : ℕ} (hn : 0 < n) :
+    descartesQ n * (1 - (1 / 2 : ℝ) • Matrix.of (fun _ _ => (1 : ℝ))) = 1 := by
+  have hn' : (n : ℝ) ≠ 0 := by exact_mod_cast hn.ne'
+  ext i j
+  simp only [descartesQ, Matrix.mul_apply, Matrix.sub_apply, Matrix.smul_apply, Matrix.of_apply,
+    smul_eq_mul, mul_one, sub_mul, mul_sub, Finset.sum_sub_distrib, Matrix.one_apply, ite_mul, one_mul,
+    zero_mul, mul_ite, mul_zero, Finset.sum_ite_eq, Finset.sum_ite_eq', Finset.mem_univ, ite_true,
+    Finset.sum_const, Finset.card_univ, Fintype.card_fin, nsmul_eq_mul]
+  push_cast
+  field_simp
+  split_ifs <;> ring
+
+theorem cmp_half_lorentzG_mul_augmentedTarget (n : ℕ) :
+    ((1 / 2 : ℝ) • lorentzG n) * augmentedTarget n = 1 := by
+  rw [lorentzG, augmentedTarget, Matrix.fromBlocks_smul, Matrix.fromBlocks_multiply, ← Matrix.fromBlocks_one]
+  congr 1
+  · ext i j
+    fin_cases i <;> fin_cases j <;> simp <;> norm_num
+  · simp
+  · simp
+  · ext k l
+    simp [Matrix.diagonal_apply, Matrix.one_apply]
+
+/-- A solution is invertible, with the explicit two-sided inverse `(G/2) Wᵀ Qₙ`. -/
+theorem cmp_inv_of_identity {n : ℕ} (W : Matrix (Fin (n + 2)) (Fin 2 ⊕ Fin n) ℝ)
+    (hW : Wᵀ * descartesQ n * W = augmentedTarget n) :
+    (((1 / 2 : ℝ) • lorentzG n) * Wᵀ * descartesQ n) * W = 1 ∧
+      W * (((1 / 2 : ℝ) • lorentzG n) * Wᵀ * descartesQ n) = 1 := by
+  have h : (((1 / 2 : ℝ) • lorentzG n) * Wᵀ * descartesQ n) * W = 1 := by
+    simp only [Matrix.mul_assoc] at hW ⊢
+    rw [hW, cmp_half_lorentzG_mul_augmentedTarget]
+  refine ⟨h, (Matrix.mul_eq_one_comm_of_card_eq _ _ _ ?_).mp h⟩
+  rw [Fintype.card_sum]
+  simp only [Fintype.card_fin]
+  omega
+
 /-- The Descartes form `⟨u, v⟩ = u ⬝ᵥ (Qₙ *ᵥ v)` as a bilinear map. -/
 noncomputable def cmp_B (n : ℕ) : (Fin (n + 2) → ℝ) →ₗ[ℝ] (Fin (n + 2) → ℝ) →ₗ[ℝ] ℝ :=
   Matrix.toLinearMap₂' ℝ (descartesQ n)
@@ -22,7 +76,7 @@ theorem cmp_B_apply {n : ℕ} (u v : Fin (n + 2) → ℝ) : cmp_B n u v = u ⬝�
   Matrix.toLinearMap₂'_apply' _ _ _
 
 theorem cmp_B_comm {n : ℕ} (u v : Fin (n + 2) → ℝ) : cmp_B n u v = cmp_B n v u := by
-  rw [cmp_B_apply, cmp_B_apply, lor_dotProduct_descartesQ_comm]
+  rw [cmp_B_apply, cmp_B_apply, cmp_dotProduct_descartesQ_comm]
 
 /-- An entry of `Aᵀ Qₙ B` is the Descartes pairing of two columns. -/
 theorem cmp_entry {n : ℕ} {ι κ : Type*} [Fintype ι] [Fintype κ] (A : Matrix (Fin (n + 2)) ι ℝ)
@@ -42,24 +96,24 @@ theorem cmp_transpose_mulVec {n : ℕ} {ι : Type*} [Fintype ι] (A : Matrix (Fi
 theorem cmp_descartesQ_mulVec_eq_zero {n : ℕ} (hn : 0 < n) {b : Fin (n + 2) → ℝ}
     (h : descartesQ n *ᵥ b = 0) : b = 0 := by
   have hinv : (1 - (1 / 2 : ℝ) • Matrix.of (fun _ _ => (1 : ℝ))) * descartesQ n = 1 :=
-    mul_eq_one_comm.mp (lor_descartesQ_mul_inv hn)
+    mul_eq_one_comm.mp (cmp_descartesQ_mul_inv hn)
   calc b = (1 : Matrix (Fin (n + 2)) (Fin (n + 2)) ℝ) *ᵥ b := (Matrix.one_mulVec b).symm
     _ = (1 - (1 / 2 : ℝ) • Matrix.of (fun _ _ => (1 : ℝ))) *ᵥ (descartesQ n *ᵥ b) := by
         rw [Matrix.mulVec_mulVec, hinv]
     _ = 0 := by rw [h, Matrix.mulVec_zero]
 
 /-- A solution `W` of the identity makes `y ↦ Wᵀ Qₙ y` injective. -/
-theorem cmp_eq_zero_of_transpose_mulVec {n : ℕ} (hn : 0 < n) (W : Matrix (Fin (n + 2)) (Fin 2 ⊕ Fin n) ℝ)
+theorem cmp_eq_zero_of_transpose_mulVec {n : ℕ} (W : Matrix (Fin (n + 2)) (Fin 2 ⊕ Fin n) ℝ)
     (hW : Wᵀ * descartesQ n * W = augmentedTarget n) {y : Fin (n + 2) → ℝ}
     (hy : Wᵀ *ᵥ (descartesQ n *ᵥ y) = 0) : y = 0 := by
-  have h1 := (lor_inv_of_identity hn W hW).2
+  have h1 := (cmp_inv_of_identity W hW).2
   calc y = (1 : Matrix (Fin (n + 2)) (Fin (n + 2)) ℝ) *ᵥ y := (Matrix.one_mulVec y).symm
     _ = W *ᵥ (((1 / 2 : ℝ) • lorentzG n) *ᵥ (Wᵀ *ᵥ (descartesQ n *ᵥ y))) := by
         rw [← h1, ← Matrix.mulVec_mulVec, ← Matrix.mulVec_mulVec, ← Matrix.mulVec_mulVec]
     _ = 0 := by rw [hy, Matrix.mulVec_zero, Matrix.mulVec_zero]
 
 /-- Uniqueness: two solutions of the identity with the same second and centre columns are equal. -/
-theorem cmp_completion_unique {n : ℕ} (hn : 0 < n) (W₁ W₂ : Matrix (Fin (n + 2)) (Fin 2 ⊕ Fin n) ℝ)
+theorem cmp_completion_unique {n : ℕ} (W₁ W₂ : Matrix (Fin (n + 2)) (Fin 2 ⊕ Fin n) ℝ)
     (hW₁ : W₁ᵀ * descartesQ n * W₁ = augmentedTarget n)
     (hW₂ : W₂ᵀ * descartesQ n * W₂ = augmentedTarget n)
     (h1 : ∀ i, W₂ i (Sum.inl 1) = W₁ i (Sum.inl 1)) (h2 : ∀ i k, W₂ i (Sum.inr k) = W₁ i (Sum.inr k)) :
@@ -98,7 +152,7 @@ theorem cmp_completion_unique {n : ℕ} (hn : 0 < n) (W₁ W₂ : Matrix (Fin (n
         rw [← hb, ba₂, ba₁, bb]; ring
     · simp only [map_add, map_sub, map_smul, smul_eq_mul, Pi.zero_apply]
       rw [va₂, va₁, vb]; ring
-  have hd := cmp_eq_zero_of_transpose_mulVec hn W₁ hW₁ hy
+  have hd := cmp_eq_zero_of_transpose_mulVec W₁ hW₁ hy
   have ha₂eq : a₂ = a₁ - (c / 4) • b := by
     rw [← sub_eq_zero, ← hd]; abel
   have hc0 : c = 0 := by
@@ -193,7 +247,7 @@ theorem cmp_exists_unique_completion {n : ℕ} (hn : 0 < n) (M : Matrix (Fin (n 
     · simp [Wv, vv, augmentedTarget, Matrix.diagonal_apply]
   refine ⟨W, ⟨hW, W1, Wv⟩, ?_⟩
   rintro W' ⟨hW', h1, h2⟩
-  exact (cmp_completion_unique hn W W' hW hW' (fun i => by rw [h1, W1])
+  exact (cmp_completion_unique W W' hW hW' (fun i => by rw [h1, W1])
     (fun i k => by rw [h2, Wv])).symm
 
 /-- The converse of LMW Theorem 3.2: every real `M` with `Mᵀ Qₙ M = diag(0, 2 Iₙ)` and a nonzero first
@@ -237,7 +291,7 @@ theorem curvature_center_converse_needs_nonzero_internal :
   refine ⟨Matrix.of fun i => Sum.elim ![(0 : ℝ)] (fun k => ![![(1 : ℝ), -1, 0, 0], ![0, 0, 1, -1]] k i),
     ?_, fun i => rfl, ?_⟩
   · ext p q
-    rw [cmp_entry, cmp_B_apply, lor_dotProduct_descartesQ]
+    rw [cmp_entry, cmp_B_apply, cmp_dotProduct_descartesQ]
     rcases p with p | k <;> rcases q with q | l
     · obtain rfl : p = 0 := Subsingleton.elim _ _
       obtain rfl : q = 0 := Subsingleton.elim _ _
