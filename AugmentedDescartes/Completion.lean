@@ -115,12 +115,86 @@ theorem cmp_completion_unique {n : ℕ} (hn : 0 < n) (W₁ W₂ : Matrix (Fin (n
     · exact (h1 i).symm
   · exact (h2 i k).symm
 
+/-- The vector completion: a nonzero null `b`, `Qₙ`-orthogonal to `n` vectors `vₖ` with `⟨vₖ, vₗ⟩ = 2 δₖₗ`, has a
+null partner `a` with `⟨a, b⟩ = −4` and `⟨a, vₖ⟩ = 0`. -/
+theorem cmp_exists_partner {n : ℕ} (hn : 0 < n) (b : Fin (n + 2) → ℝ) (v : Fin n → Fin (n + 2) → ℝ)
+    (bb : cmp_B n b b = 0) (vb : ∀ k, cmp_B n (v k) b = 0)
+    (vv : ∀ k l, cmp_B n (v k) (v l) = if k = l then 2 else 0) (hb0 : b ≠ 0) :
+    ∃ a : Fin (n + 2) → ℝ, cmp_B n a a = 0 ∧ cmp_B n a b = -4 ∧ ∀ k, cmp_B n a (v k) = 0 := by
+  have hQb : descartesQ n *ᵥ b ≠ 0 := fun h => hb0 (cmp_descartesQ_mulVec_eq_zero hn h)
+  obtain ⟨ℓ, hℓ⟩ := Function.ne_iff.mp hQb
+  set e : Fin (n + 2) → ℝ := Pi.single ℓ 1 with he
+  have heb : cmp_B n e b ≠ 0 := by
+    rw [cmp_B_apply, he, single_dotProduct, one_mul]; simpa using hℓ
+  set z : Fin (n + 2) → ℝ := e - (1 / 2 : ℝ) • ∑ k, cmp_B n e (v k) • v k with hz
+  have zv : ∀ l, cmp_B n z (v l) = 0 := by
+    intro l
+    simp only [hz, map_sub, map_smul, map_sum, LinearMap.sub_apply, LinearMap.smul_apply,
+      LinearMap.sum_apply, smul_eq_mul, vv, mul_ite, mul_zero, Finset.sum_ite_eq', Finset.mem_univ,
+      ite_true]
+    ring
+  have zb : cmp_B n z b = cmp_B n e b := by
+    simp only [hz, map_sub, map_smul, map_sum, LinearMap.sub_apply, LinearMap.smul_apply,
+      LinearMap.sum_apply, smul_eq_mul, vb, mul_zero, Finset.sum_const_zero]
+    ring
+  have hβ : cmp_B n z b ≠ 0 := by rw [zb]; exact heb
+  have bz : cmp_B n b z = cmp_B n z b := cmp_B_comm _ _
+  have bv : ∀ k, cmp_B n b (v k) = 0 := fun k => by rw [cmp_B_comm]; exact vb k
+  refine ⟨(-4 / cmp_B n z b) • (z - (cmp_B n z z / (2 * cmp_B n z b)) • b), ?_, ?_, ?_⟩
+  · simp only [map_smul, map_sub, LinearMap.smul_apply, LinearMap.sub_apply, smul_eq_mul]
+    rw [bz, bb]
+    field_simp
+    ring
+  · simp only [map_smul, map_sub, LinearMap.smul_apply, LinearMap.sub_apply, smul_eq_mul]
+    rw [bb]
+    field_simp
+    ring
+  · intro k
+    simp only [map_smul, map_sub, LinearMap.smul_apply, LinearMap.sub_apply, smul_eq_mul]
+    rw [zv, bv]
+    ring
+
 /-- A solution of the curvature–centre equation with a nonzero first column completes to exactly one solution of
 the augmented identity with the same second and centre columns. -/
 theorem cmp_exists_unique_completion {n : ℕ} (hn : 0 < n) (M : Matrix (Fin (n + 2)) (Fin 1 ⊕ Fin n) ℝ)
     (hM : Mᵀ * descartesQ n * M = curvatureCenterTarget n) (hb : ∃ i, M i (Sum.inl 0) ≠ 0) :
     ∃! W : Matrix (Fin (n + 2)) (Fin 2 ⊕ Fin n) ℝ, Wᵀ * descartesQ n * W = augmentedTarget n ∧
-      (∀ i, W i (Sum.inl 1) = M i (Sum.inl 0)) ∧ ∀ i k, W i (Sum.inr k) = M i (Sum.inr k) := sorry
+      (∀ i, W i (Sum.inl 1) = M i (Sum.inl 0)) ∧ ∀ i k, W i (Sum.inr k) = M i (Sum.inr k) := by
+  have E : ∀ p q, cmp_B n (fun i => M i p) (fun i => M i q) = curvatureCenterTarget n p q := by
+    intro p q; rw [← cmp_entry, hM]
+  have bb : cmp_B n (fun i => M i (Sum.inl 0)) (fun i => M i (Sum.inl 0)) = 0 := by
+    simpa [curvatureCenterTarget] using E (Sum.inl 0) (Sum.inl 0)
+  have bv : ∀ k, cmp_B n (fun i => M i (Sum.inl 0)) (fun i => M i (Sum.inr k)) = 0 := by
+    intro k; simpa [curvatureCenterTarget] using E (Sum.inl 0) (Sum.inr k)
+  have vb : ∀ k, cmp_B n (fun i => M i (Sum.inr k)) (fun i => M i (Sum.inl 0)) = 0 := by
+    intro k; simpa [curvatureCenterTarget] using E (Sum.inr k) (Sum.inl 0)
+  have vv : ∀ k l, cmp_B n (fun i => M i (Sum.inr k)) (fun i => M i (Sum.inr l)) =
+      if k = l then 2 else 0 := by
+    intro k l; simpa [curvatureCenterTarget, Matrix.diagonal_apply] using E (Sum.inr k) (Sum.inr l)
+  have hb0 : (fun i => M i (Sum.inl 0)) ≠ 0 := by
+    obtain ⟨i, hi⟩ := hb; intro h; exact hi (congrFun h i)
+  obtain ⟨a, aa, ab, av⟩ := cmp_exists_partner hn (fun i => M i (Sum.inl 0)) (fun k i => M i (Sum.inr k))
+    bb vb vv hb0
+  have ba : cmp_B n (fun i => M i (Sum.inl 0)) a = -4 := by rw [cmp_B_comm]; exact ab
+  have va : ∀ k, cmp_B n (fun i => M i (Sum.inr k)) a = 0 := fun k => by rw [cmp_B_comm]; exact av k
+  set W : Matrix (Fin (n + 2)) (Fin 2 ⊕ Fin n) ℝ :=
+    Matrix.of fun i => Sum.elim ![a i, M i (Sum.inl 0)] (fun k => M i (Sum.inr k)) with hWdef
+  have W0 : ∀ i, W i (Sum.inl 0) = a i := fun i => rfl
+  have W1 : ∀ i, W i (Sum.inl 1) = M i (Sum.inl 0) := fun i => rfl
+  have Wv : ∀ i k, W i (Sum.inr k) = M i (Sum.inr k) := fun i k => rfl
+  have hW : Wᵀ * descartesQ n * W = augmentedTarget n := by
+    ext p q
+    rw [cmp_entry]
+    rcases p with p | k <;> rcases q with q | l
+    · fin_cases p <;> fin_cases q <;>
+        simp [W0, W1, aa, ab, ba, bb, augmentedTarget]
+    · fin_cases p <;> simp [W0, W1, Wv, av, bv, augmentedTarget]
+    · fin_cases q <;> simp [W0, W1, Wv, va, vb, augmentedTarget]
+    · simp [Wv, vv, augmentedTarget, Matrix.diagonal_apply]
+  refine ⟨W, ⟨hW, W1, Wv⟩, ?_⟩
+  rintro W' ⟨hW', h1, h2⟩
+  exact (cmp_completion_unique hn W W' hW hW' (fun i => by rw [h1, W1])
+    (fun i k => by rw [h2, Wv])).symm
 
 /-- The converse of LMW Theorem 3.2: every real `M` with `Mᵀ Qₙ M = diag(0, 2 Iₙ)` and a nonzero first
 column is the curvature–centre matrix of exactly one family of valid, pairwise tangent oriented spheres and
@@ -128,7 +202,30 @@ hyperplanes. -/
 theorem curvature_center_converse_internal {n : ℕ} (hn : 0 < n) (M : Matrix (Fin (n + 2)) (Fin 1 ⊕ Fin n) ℝ)
     (hM : Mᵀ * descartesQ n * M = curvatureCenterTarget n) (hb : ∃ i, M i (Sum.inl 0) ≠ 0) :
     ∃! s : Fin (n + 2) → OrientedSphere n, (∀ i, OrientedSphere.IsValid (s i)) ∧
-      (∀ i j, i ≠ j → OrientedSphere.Tangent (s i) (s j)) ∧ curvatureCenterMatrixOf s = M := sorry
+      (∀ i j, i ≠ j → OrientedSphere.Tangent (s i) (s j)) ∧ curvatureCenterMatrixOf s = M := by
+  obtain ⟨W, ⟨hW, hc1, hc2⟩, huW⟩ := cmp_exists_unique_completion hn M hM hb
+  obtain ⟨s, ⟨hv, ht, hs⟩, hus⟩ := augmented_descartes_converse_internal hn W hW
+  have hcc : curvatureCenterMatrixOf s = M := by
+    ext i p
+    rcases p with p | k
+    · obtain rfl : p = 0 := Subsingleton.elim _ _
+      have := congrFun (congrFun hs i) (Sum.inl 1)
+      simp only [augmentedMatrixOf, Matrix.of_apply] at this
+      simp [curvatureCenterMatrixOf, this, hc1]
+    · have := congrFun (congrFun hs i) (Sum.inr k)
+      simp only [augmentedMatrixOf, Matrix.of_apply] at this
+      simp [curvatureCenterMatrixOf, this, hc2]
+  refine ⟨s, ⟨hv, ht, hcc⟩, ?_⟩
+  rintro s' ⟨hv', ht', hs'⟩
+  apply hus s' ⟨hv', ht', ?_⟩
+  have hW' := augmented_descartes_general_internal hn s' hv' ht'
+  apply huW _ ⟨hW', ?_, ?_⟩
+  · intro i
+    have := congrFun (congrFun hs' i) (Sum.inl 0)
+    simpa [curvatureCenterMatrixOf, augmentedMatrixOf] using this
+  · intro i k
+    have := congrFun (congrFun hs' i) (Sum.inr k)
+    simpa [curvatureCenterMatrixOf, augmentedMatrixOf] using this
 
 /-- The hypothesis of `curvature_center_converse` is needed: at `n = 2` the matrix with columns
 `0, e₀ − e₁, e₂ − e₃` solves the equation and is the curvature–centre matrix of no family. -/
@@ -136,6 +233,30 @@ theorem curvature_center_converse_needs_nonzero_internal :
     ∃ M : Matrix (Fin (2 + 2)) (Fin 1 ⊕ Fin 2) ℝ, Mᵀ * descartesQ 2 * M = curvatureCenterTarget 2 ∧
       (∀ i, M i (Sum.inl 0) = 0) ∧
       ¬ ∃ s : Fin (2 + 2) → OrientedSphere 2, (∀ i, OrientedSphere.IsValid (s i)) ∧
-        (∀ i j, i ≠ j → OrientedSphere.Tangent (s i) (s j)) ∧ curvatureCenterMatrixOf s = M := sorry
+        (∀ i j, i ≠ j → OrientedSphere.Tangent (s i) (s j)) ∧ curvatureCenterMatrixOf s = M := by
+  refine ⟨Matrix.of fun i => Sum.elim ![(0 : ℝ)] (fun k => ![![(1 : ℝ), -1, 0, 0], ![0, 0, 1, -1]] k i),
+    ?_, fun i => rfl, ?_⟩
+  · ext p q
+    rw [cmp_entry, cmp_B_apply, lor_dotProduct_descartesQ]
+    rcases p with p | k <;> rcases q with q | l
+    · obtain rfl : p = 0 := Subsingleton.elim _ _
+      obtain rfl : q = 0 := Subsingleton.elim _ _
+      simp [curvatureCenterTarget]
+    · obtain rfl : p = 0 := Subsingleton.elim _ _
+      simp [curvatureCenterTarget]
+    · obtain rfl : q = 0 := Subsingleton.elim _ _
+      simp [curvatureCenterTarget]
+    · fin_cases k <;> fin_cases l <;>
+        simp [curvatureCenterTarget, Fin.sum_univ_succ] <;> norm_num
+  · rintro ⟨s, hv, ht, hs⟩
+    have h := augmented_descartes_general_internal (by norm_num) s hv ht
+    have h2 := congrFun (congrFun h (Sum.inl 0)) (Sum.inl 1)
+    rw [cmp_entry] at h2
+    have hcol : (fun i => augmentedMatrixOf s i (Sum.inl 1)) = 0 := by
+      funext i
+      have := congrFun (congrFun hs i) (Sum.inl 0)
+      simpa [curvatureCenterMatrixOf, augmentedMatrixOf] using this
+    rw [hcol, map_zero] at h2
+    simp [augmentedTarget] at h2
 
 end AugmentedDescartes
