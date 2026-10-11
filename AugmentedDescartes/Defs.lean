@@ -41,8 +41,9 @@ oriented sphere with centre `x` and signed radius `r`, where `b = 1/r` and `b̄ 
 noncomputable def sphereRow {n : ℕ} (x : EuclideanSpace ℝ (Fin n)) (r : ℝ) : Fin 2 ⊕ Fin n → ℝ :=
   Sum.elim ![‖x‖ ^ 2 / r - r, 1 / r] (fun k => x k / r)
 
-/-- LMW (3.9): the coordinates `(2δ, 0, h)` of the oriented hyperplane `⟪h, y⟫ = δ` with unit normal `h`
-(its inversion in the unit sphere has curvature `2δ`). -/
+/-- LMW (3.9): the coordinates `(2δ, 0, h)` of the oriented hyperplane `⟪h, y⟫ = δ` with unit normal `h`,
+whose interior is the side `⟪h, y⟫ > δ` into which `h` points (the inversion of that half-space in the unit
+sphere is a ball or the exterior of a ball of signed curvature `2δ`). -/
 noncomputable def planeRow {n : ℕ} (h : EuclideanSpace ℝ (Fin n)) (δ : ℝ) : Fin 2 ⊕ Fin n → ℝ :=
   Sum.elim ![2 * δ, 0] (fun k => h k)
 
