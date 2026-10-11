@@ -14,9 +14,10 @@ unit sphere) and augmented curvature–centre coordinates `(b̄, b, b x)` (Defin
 sphere of curvature `2δ`). For `n + 2` mutually tangent oriented spheres the augmented matrix `W` with these
 rows satisfies `Wᵀ Qₙ W = [[0, −4, 0], [−4, 0, 0], [0, 0, 2 Iₙ]]` with `Qₙ = I − (1/n) 𝟙𝟙ᵀ` (Theorem 3.3),
 and every real solution `W` is the augmented matrix of a unique configuration (its converse). The
-Soddy–Gosset relation `(Σ bᵢ)² = n Σ bᵢ²` is the `(b, b)` entry (Theorem 3.1), the curvature–centre identity
-`Mᵀ Qₙ M = diag(0, 2 Iₙ)` is the identity with the first row and column deleted (Theorem 3.2), and at
-`n = 2` the complex Descartes theorem `(Σ bᵢ zᵢ)² = 2 Σ (bᵢ zᵢ)²` is its centre block (Theorem 2.1).
+Soddy–Gosset relation `(Σ bᵢ)² = n Σ bᵢ²` is the `(b, b)` entry (Theorem 1.2, (1.2); Theorem 3.1 is its
+converse), the curvature–centre identity `Mᵀ Qₙ M = diag(0, 2 Iₙ)` is the identity with the first row and
+column deleted (Theorem 3.2), and at `n = 2` the complex Descartes theorem `(Σ bᵢ zᵢ)² = 2 Σ (bᵢ zᵢ)²` is its
+centre block (Theorem 2.1).
 
 Tangency is by signed distances, LMW's oriented tangency pair by pair: two spheres `dist (x, y)² = (r + s)²`
 (external tangency for two positive radii, internal when one radius is negative); a sphere and a hyperplane
@@ -24,25 +25,27 @@ Tangency is by signed distances, LMW's oriented tangency pair by pair: two spher
 hyperplanes `h' = −h` (tangent at infinity). The disjoint-interiors property of an oriented Descartes
 configuration is not formalized: the converses deliver tangency in this sense. Everything holds for `n ≥ 1`;
 LMW's Section 3 assumes `n ≥ 2`, and their Section 8, (8.4), states the identity on the line with the same
-target.
+target under its own convention for the infinite interval.
 
 The development runs LMW's Section 4 argument (Lemmas 4.3–4.4, (4.9)–(4.10)) directly in Euclidean
 coordinates: with `G = [[0, −½, 0], [−½, 0, 0], [0, 0, Iₙ]]` (the inverse of half the target, not the
 change-of-coordinates matrix `G` of their (5.1)), the rows of `W` have Gram matrix `W G Wᵀ = 2I − J` exactly
 when each row has Lorentz norm `1` and each pair pairs to `−1`, and the sphere and hyperplane rows pair to
 `−1` exactly when they are tangent; `Wᵀ Qₙ W = 2 G⁻¹` is then `(2I − J)(Qₙ/2) = I` read backwards. Also
-proved here: the existence half of the converse of Theorem 3.1 (every nonzero `b` with `(Σ bᵢ)² = n Σ bᵢ²` is
-the curvature vector of a configuration; LMW: "We do not know an easy proof of this result; a proof appears
-in [16]", [16] being Graham–Lagarias–Mallows–Wilks–Yan, *Apollonian circle packings: geometry and group
-theory III*, whose Theorem 3.2 is the transitivity the argument needs), by one `Qₙ`-reflection from the
-configuration of GLMWY III's Theorem 6.1; the converse of Theorem 3.2 in every dimension under the hypothesis
-of a nonzero first column (GLMWY I, Theorem 3.1 and its Remark, prove it at `n = 2` with that hypothesis;
-LMW's printed converse omits it, and the matrix at `n = 2` with columns `0, e₀ − e₁, e₂ − e₃` solves the
-equation and is no configuration); Soddy's two spheres in every dimension `n ≥ 2`, in the signed sense (LMW
+proved here: the existence half of the converse of the Soddy–Gosset theorem, LMW's Theorem 3.1 (every
+nonzero `b` with `(Σ bᵢ)² = n Σ bᵢ²` is the curvature vector of a configuration; LMW: "We do not know an easy
+proof of this result; a proof appears in [16]", [16] being Graham–Lagarias–Mallows–Wilks–Yan, *Apollonian
+circle packings: geometry and group theory III*, whose arXiv versions 1–2 prove both halves as their Theorem
+2.2 from the same base configuration and the transitivity of the Lorentz group, a section the published
+version omits), by one `Qₙ`-reflection from that configuration (GLMWY III, Theorem 6.1); the converse of
+Theorem 3.2 in every dimension under the hypothesis of a nonzero first column (GLMWY I, Theorem 3.1 and its
+Remark, prove it at `n = 2` with that hypothesis; LMW's printed converse and GLMWY III's Theorem 2.3 omit it,
+and the matrix at `n = 2` with columns `0, e₀ − e₁, e₂ − e₃`, GLMWY I's configuration (3.15) with its first
+column zeroed, solves the equation and is no configuration); Soddy's two spheres in every dimension `n ≥ 2`, in the signed sense (LMW
 footnote 3; GLMWY III §4.1): the oriented spheres and hyperplanes tangent to `n + 1` members of a
 configuration are exactly the missing one and its Apollonian reflection, with `b + b' = (2/(n − 1)) Σ bᵢ`,
 the Apollonian generators of GLMWY III (4.1) preserving `Qₙ`; the existence of a configuration in every
-dimension (GLMWY III, Theorem 6.1); `det Qₙ = −2/n` (GLMWY III, Lemma 6.4); and the three statements in
+dimension (GLMWY III, Theorem 6.1); `det Qₙ = −2/n` (GLMWY III, (6.4) in the proof of Lemma 6.4); and the three statements in
 Mathlib's vocabulary (`EuclideanGeometry.Sphere.IsExtTangent`, `IsIntTangent`). The congruence half of
 Theorem 3.1's converse is not formalized.
 
@@ -232,7 +235,8 @@ theorem augmented_descartes_converse_spheres {n : ℕ} (hn : 0 < n)
 
 /-! ## Corollaries: Soddy–Gosset, the curvature–centre identity, the complex Descartes theorem -/
 
-/-- The Soddy–Gosset theorem (LMW Theorem 3.1, (1.2)): `(Σ 1/rᵢ)² = n Σ (1/rᵢ)²`. -/
+/-- The Soddy–Gosset theorem (LMW Theorem 1.2, (1.2); Soddy 1936, Gosset 1937, Lachlan 1886 at `n = 3`):
+`(Σ 1/rᵢ)² = n Σ (1/rᵢ)²`. -/
 theorem soddy_gosset {n : ℕ} (hn : 0 < n) (x : Fin (n + 2) → EuclideanSpace ℝ (Fin n))
     (r : Fin (n + 2) → ℝ) (h : PairwiseTangent x r) :
     (∑ i, 1 / r i) ^ 2 = n * ∑ i, (1 / r i) ^ 2 := sorry
@@ -274,7 +278,7 @@ theorem complex_descartes_mixed (x : Fin (2 + 2) → EuclideanSpace ℝ (Fin 2))
     ∑ i, (1 / r i : ℂ) * (((x i 0 : ℂ) + (x i 1 : ℂ) * Complex.I) / r i) =
       (1 / 2) * (∑ i, (1 / r i : ℂ)) * ∑ i, ((x i 0 : ℂ) + (x i 1 : ℂ) * Complex.I) / r i := sorry
 
-/-- `det Qₙ = −2/n` (GLMWY III, Lemma 6.4). -/
+/-- `det Qₙ = −2/n` (GLMWY III, (6.4) in the proof of Lemma 6.4). -/
 theorem det_descartesQ (n : ℕ) (hn : 0 < n) : (descartesQ n).det = -2 / n := sorry
 
 /-! ## Mathlib's spheres -/
@@ -321,7 +325,8 @@ theorem exists_pairwiseTangent (n : ℕ) (hn : 0 < n) :
     ∃ x : Fin (n + 2) → EuclideanSpace ℝ (Fin n), ∃ r : Fin (n + 2) → ℝ, PairwiseTangent x r := sorry
 
 /-- The existence half of the converse of the Soddy–Gosset theorem (LMW Theorem 3.1, which LMW state with
-"We do not know an easy proof of this result; a proof appears in [16]"): every nonzero `b` with
+"We do not know an easy proof of this result; a proof appears in [16]"; GLMWY III's arXiv versions 1–2 prove
+it as their Theorem 2.2 by the same route): every nonzero `b` with
 `(Σ bᵢ)² = n Σ bᵢ²` is the curvature vector of a pairwise tangent family of valid oriented spheres
 (`bᵢ ≠ 0`) and hyperplanes (`bᵢ = 0`), tangency in the signed-distance sense; the congruence half is not
 formalized. -/
