@@ -5,7 +5,7 @@ public import AugmentedDescartes.Main
 /-!
 # Corollaries
 
-The complex Descartes theorem and Mathlib's spheres (ARCH.md §3). Lane `corollaries`.
+The complex Descartes theorem and Mathlib's spheres (PROOF.md §3).
 -/
 
 @[expose] public section
@@ -113,7 +113,9 @@ theorem cor_pairwiseTangent_of_ext {n : ℕ}
     PairwiseTangent (fun i => (s i).center) (fun i => (s i).radius) :=
   ⟨fun i => (hr i).ne', fun i j hij => by simp only [(ht i j hij).dist_center]⟩
 
-/-- Soddy–Gosset for Mathlib's spheres: `n + 2` spheres of positive radius, pairwise externally tangent. -/
+/-- Soddy–Gosset for Mathlib's spheres: `n + 2` spheres of positive radius, pairwise externally tangent
+(LMW's case (i); at `n = 1` the hypotheses cannot be met, three pairwise externally tangent intervals forcing
+a zero radius). -/
 theorem sphere_soddy_gosset_internal {n : ℕ} (hn : 0 < n)
     (s : Fin (n + 2) → EuclideanGeometry.Sphere (EuclideanSpace ℝ (Fin n)))
     (hr : ∀ i, 0 < (s i).radius)
@@ -150,8 +152,9 @@ theorem cor_pairwiseTangent_enclosing {n : ℕ}
       · simp only [hi, hj, ↓reduceIte]
         rw [(hext i j hi hj hij).dist_center]
 
-/-- Soddy–Gosset with one enclosing sphere `e`, to which the others are internally tangent and which
-carries the curvature `−1/rₑ`. -/
+/-- Soddy–Gosset with one enclosing sphere `e`, to which the others are internally tangent
+(`IsIntTangent (s j) (s e)`: `s j` lies inside `s e`) and which carries the curvature `−1/rₑ` (LMW's case
+(ii)). -/
 theorem sphere_soddy_gosset_enclosing_internal {n : ℕ} (hn : 0 < n)
     (s : Fin (n + 2) → EuclideanGeometry.Sphere (EuclideanSpace ℝ (Fin n))) (e : Fin (n + 2))
     (hr : ∀ i, 0 < (s i).radius)
@@ -168,7 +171,7 @@ theorem sphere_soddy_gosset_enclosing_internal {n : ℕ} (hn : 0 < n)
   simp only [hc] at key
   exact key
 
-/-- The augmented identity for Mathlib's spheres, pairwise externally tangent. -/
+/-- The augmented identity for Mathlib's spheres, pairwise externally tangent (unsatisfiable at `n = 1`). -/
 theorem sphere_augmented_descartes_internal {n : ℕ} (hn : 0 < n)
     (s : Fin (n + 2) → EuclideanGeometry.Sphere (EuclideanSpace ℝ (Fin n)))
     (hr : ∀ i, 0 < (s i).radius)
@@ -177,17 +180,5 @@ theorem sphere_augmented_descartes_internal {n : ℕ} (hn : 0 < n)
       augmentedMatrix (fun i => (s i).center) (fun i => (s i).radius) = augmentedTarget n :=
   augmented_descartes_internal hn _ _ (cor_pairwiseTangent_of_ext s hr ht)
 
-/-- The augmented identity for Mathlib's spheres with one enclosing sphere `e`, whose row is taken with
-the signed radius `−rₑ`. -/
-theorem cor_sphere_augmented_descartes_enclosing {n : ℕ} (hn : 0 < n)
-    (s : Fin (n + 2) → EuclideanGeometry.Sphere (EuclideanSpace ℝ (Fin n))) (e : Fin (n + 2))
-    (hr : ∀ i, 0 < (s i).radius)
-    (hint : ∀ j, j ≠ e → EuclideanGeometry.Sphere.IsIntTangent (s j) (s e))
-    (hext : ∀ i j, i ≠ e → j ≠ e → i ≠ j → EuclideanGeometry.Sphere.IsExtTangent (s i) (s j)) :
-    (augmentedMatrix (fun i => (s i).center)
-        (fun i => if i = e then -(s i).radius else (s i).radius))ᵀ * descartesQ n *
-      augmentedMatrix (fun i => (s i).center)
-        (fun i => if i = e then -(s i).radius else (s i).radius) = augmentedTarget n :=
-  augmented_descartes_internal hn _ _ (cor_pairwiseTangent_enclosing s e hr hint hext)
 
 end AugmentedDescartes

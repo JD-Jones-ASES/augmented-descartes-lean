@@ -41,9 +41,9 @@ oriented sphere with centre `x` and signed radius `r`, where `b = 1/r` and `b̄ 
 noncomputable def sphereRow {n : ℕ} (x : EuclideanSpace ℝ (Fin n)) (r : ℝ) : Fin 2 ⊕ Fin n → ℝ :=
   Sum.elim ![‖x‖ ^ 2 / r - r, 1 / r] (fun k => x k / r)
 
-/-- LMW (3.9): the coordinates `(2δ, 0, h)` of the oriented hyperplane `⟪h, y⟫ = δ` with unit normal `h`,
-whose interior is the side `⟪h, y⟫ > δ` into which `h` points (the inversion of that half-space in the unit
-sphere is a ball or the exterior of a ball of signed curvature `2δ`). -/
+/-- LMW (3.9): the coordinates `(b̄, 0, h)` of the oriented hyperplane `⟪h, y⟫ = δ` with unit normal `h`, where
+`b̄ = 2δ` is the curvature of its inversion in the unit sphere (GLMWY I, p. 8: twice the distance from the
+origin), the interior being the side `⟪h, y⟫ > δ` into which `h` points (GLMWY III, p. 7). -/
 noncomputable def planeRow {n : ℕ} (h : EuclideanSpace ℝ (Fin n)) (δ : ℝ) : Fin 2 ⊕ Fin n → ℝ :=
   Sum.elim ![2 * δ, 0] (fun k => h k)
 
@@ -84,8 +84,9 @@ noncomputable def OrientedSphere.row {n : ℕ} (s : OrientedSphere n) : Fin 2 �
 noncomputable def OrientedSphere.curvature {n : ℕ} (s : OrientedSphere n) : ℝ :=
   Sum.elim (fun p => 1 / p.2) (fun _ => 0) s
 
-/-- LMW's oriented tangency, by cases: two spheres `dist (x, y)² = (r + s)²`; a sphere `(x, r)` and a
-hyperplane `(h, δ)`: `⟪h, x⟫ − δ = −r`; two hyperplanes: opposite unit normals. -/
+/-- Oriented tangency pair by pair (the pairwise form of LMW's oriented Descartes configurations; GLMWY III,
+arXiv v2, Definition 2.1): two spheres `dist (x, y)² = (r + s)²`; a sphere `(x, r)` and a hyperplane `(h, δ)`:
+`⟪h, x⟫ − δ = −r`; two hyperplanes: opposite unit normals. -/
 noncomputable def OrientedSphere.Tangent {n : ℕ} (s t : OrientedSphere n) : Prop :=
   Sum.elim
     (fun p => Sum.elim (fun q => dist p.1 q.1 ^ 2 = (p.2 + q.2) ^ 2)

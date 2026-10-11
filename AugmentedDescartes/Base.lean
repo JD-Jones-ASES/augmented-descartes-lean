@@ -5,7 +5,7 @@ public import AugmentedDescartes.Rows
 /-!
 # Base
 
-The strip configuration (ARCH.md §6). Lane `base`.
+The strip configuration (PROOF.md §6).
 -/
 
 @[expose] public section
@@ -133,7 +133,8 @@ theorem base_config_tangent (n : ℕ) (i j : Fin (n + 2)) (hij : i ≠ j) :
     | (exfalso; omega)
 
 /-- Existence of a configuration in every dimension: two parallel hyperplanes at distance `2` and `n`
-unit spheres centred at `√2 eᵢ` (the configuration of GLMWY III, Theorem 6.1). -/
+unit spheres centred at `√2 eᵢ` (the configuration in the proof of GLMWY III's Theorem 6.1, given there for
+`n ≥ 2`; at `n = 1` the hyperplanes are oriented points). -/
 theorem exists_configuration_internal (n : ℕ) (hn : 0 < n) :
     ∃ s : Fin (n + 2) → OrientedSphere n, (∀ i, OrientedSphere.IsValid (s i)) ∧
       ∀ i j, i ≠ j → OrientedSphere.Tangent (s i) (s j) :=

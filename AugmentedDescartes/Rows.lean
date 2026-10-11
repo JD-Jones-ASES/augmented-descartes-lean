@@ -5,7 +5,7 @@ public import AugmentedDescartes.Defs
 /-!
 # Rows
 
-The encoding: Lorentz pairings of sphere and hyperplane rows (ARCH.md §1). Lane `rows`.
+The encoding: Lorentz pairings of sphere and hyperplane rows (PROOF.md §1).
 -/
 
 @[expose] public section

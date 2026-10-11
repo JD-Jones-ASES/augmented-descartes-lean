@@ -38,12 +38,12 @@ are fully specified in the Challenge, so the comparator checks the Solution's va
 | 23 | `sphere_soddy_gosset` — Soddy–Gosset for Mathlib's spheres: `n + 2` spheres of positive radius, pairwise externally tangent (LMW's case (i); at `n = 1` the hypotheses cannot be met, three pairwise externally tangent intervals forcing a zero radius) | AugmentedDescartes/Corollaries.lean |
 | 24 | `sphere_soddy_gosset_enclosing` — Soddy–Gosset with one enclosing sphere `e`, to which the others are internally tangent (`IsIntTangent (s j) (s e)`: `s j` lies inside `s e`) and which carries the curvature `−1/rₑ` (LMW's case (ii)) | AugmentedDescartes/Corollaries.lean |
 | 25 | `sphere_augmented_descartes` — The augmented identity for Mathlib's spheres, pairwise externally tangent (unsatisfiable at `n = 1`) | AugmentedDescartes/Corollaries.lean |
-| 26 | `exists_configuration` — Existence of a configuration in every dimension: two parallel hyperplanes at distance `2` and `n` unit spheres centred at `√2 eᵢ` (the configuration of GLMWY III, Theorem 6.1, stated there for `n ≥ 2`; at `n = 1` the hyperplanes are oriented points) | AugmentedDescartes/Base.lean |
+| 26 | `exists_configuration` — Existence of a configuration in every dimension: two parallel hyperplanes at distance `2` and `n` unit spheres centred at `√2 eᵢ` (the configuration in the proof of GLMWY III's Theorem 6.1, given there for `n ≥ 2`; at `n = 1` the hyperplanes are oriented points) | AugmentedDescartes/Base.lean |
 | 27 | `exists_pairwiseTangent` — Existence of a pairwise tangent family of spheres in every dimension | AugmentedDescartes/Transitivity.lean |
 | 28 | `converse_soddy_gosset` — The existence half of the converse of the Soddy–Gosset theorem (LMW Theorem 3.1, which LMW state with "We do not know an easy proof of this result; a proof appears in [16]"; GLMWY III's arXiv versions 1–2 prove it as their Theorem 2.2 by the same route): every nonzero `b` with `(Σ bᵢ)² = n Σ bᵢ²` is the curvature vector of a pairwise tangent family of valid oriented spheres (`bᵢ ≠ 0`) and hyperplanes (`bᵢ = 0`), tangency in the signed-distance sense; the congruence half is not formalized | AugmentedDescartes/Transitivity.lean |
 | 29 | `converse_soddy_gosset_spheres` — The existence half of the converse of the Soddy–Gosset theorem for spheres: every `b` with no zero entry and `(Σ bᵢ)² = n Σ bᵢ²` is the curvature vector of a pairwise tangent family of spheres (tangency in the signed-distance sense) | AugmentedDescartes/Transitivity.lean |
 | 30 | `curvature_center_converse` — The converse of LMW Theorem 3.2 in every dimension, under the hypothesis of a nonzero first column (GLMWY I, Theorem 3.1 and its Remark, state and prove it at `n = 2` with this hypothesis; LMW's printed converse, "any real solution `M`", omits it): every real `M` with `Mᵀ Qₙ M = diag(0, 2 Iₙ)` and a nonzero first column is the curvature–centre matrix of exactly one family of valid, pairwise tangent oriented spheres and hyperplanes (tangency in the signed-distance sense) | AugmentedDescartes/Completion.lean |
-| 31 | `curvature_center_converse_needs_nonzero` — The hypothesis of `curvature_center_converse` is needed (GLMWY I, the Remark after Theorem 3.1): at `n = 2` the matrix with columns `0, e₀ − e₁, e₂ − e₃` solves the equation and is the curvature–centre matrix of no family | AugmentedDescartes/Completion.lean |
+| 31 | `curvature_center_converse_needs_nonzero` — The hypothesis of `curvature_center_converse` is needed (GLMWY I, the Remark after Theorem 3.1): at `n = 2` the matrix with columns `0, e₀ − e₁, e₂ − e₃` solves the equation and is the curvature–centre matrix of no valid, pairwise tangent family (it is the matrix of four oriented lines with normals `±e₀, ±e₁`, which are not pairwise tangent) | AugmentedDescartes/Completion.lean |
 | 32 | `apollonianGen_mem_aut` — The Apollonian generators preserve the Descartes form (GLMWY III, after (4.1)): `Sₖᵀ Qₙ Sₖ = Qₙ` | AugmentedDescartes/Apollonian.lean |
 | 33 | `apollonian_reflection` — Replacing sphere `k` of a configuration by its Apollonian reflection gives a configuration | AugmentedDescartes/Apollonian.lean |
 | 34 | `apollonianGen_mul_apply` — The reflected row is `(2/(n−1)) Σ_{i ≠ k} (row i) − (row k)`; in particular the two curvatures satisfy `bₖ + bₖ' = (2/(n−1)) Σ_{i ≠ k} bᵢ` and the centre columns the like relation (LMW (2.1) and (2.4) at `n = 2`) | AugmentedDescartes/Apollonian.lean |
@@ -54,31 +54,44 @@ are fully specified in the Challenge, so the comparator checks the Solution's va
 
 - **Build** — `lake build AugmentedDescartes`, `lake build Challenge`, `lake build Solution`, `lake build Test` on the
   pinned toolchain and Mathlib (`lean-toolchain`, `lake-manifest.json`; `lake update` is never run).
-- **Axioms** — `Test/Axioms.lean` walks every public constant in `AugmentedDescartes.*` (private auxiliaries are not
-  enumerated under the module system, but `collectAxioms` reaches every private constant a public proof uses) and fails
-  the build on any axiom beyond `propext`, `Classical.choice`, `Quot.sound`; it also fails if fewer than 250
-  constants are matched or any compared theorem is missing from the environment.
-- **Source guard** — `scripts/check-source.py` rejects `sorry`, `admit`, `axiom`, `native_decide`, `unsafe`,
-  `partial`, `implemented_by`, `extern`, `opaque`, `mutual`, `ofReduceBool`, `set_option` and every `debug.` option
-  outside comments and strings in `AugmentedDescartes/`, `Solution.lean` and `Test/` (Challenge.lean's intentional `sorry`
-  placeholders excepted), any `leanOptions`, `moreLeanArgs`, `weakLeanArgs` or `-D` in `lakefile.toml`, and any control
-  character in the Python scripts; `scripts/check_source_guard.py` runs the guard on one clean fixture, six
-  prohibited-option fixtures and one with a control byte in a script.
+- **Axioms** — `Test/Axioms.lean` walks every constant whose name begins with `AugmentedDescartes.`,
+  `_private.AugmentedDescartes.` or `_private.Solution.` (private auxiliaries are not enumerated under the module
+  system, but `collectAxioms` reaches every private constant a public proof uses) and fails the build on any axiom
+  beyond `propext`, `Classical.choice`, `Quot.sound`; it also fails if fewer than 220 constants are matched
+  (248 are) or any compared theorem is missing from the environment.
+- **Source guard** — `scripts/check-source.py` rejects `sorry`, `sorryAx`, `admit`, `axiom`, `native_decide`, `unsafe`,
+  `partial`, `implemented_by`, `extern`, `opaque`, `mutual`, `csimp`, `ofReduceNat`, `ofReduceBool`, `set_option` and
+  every `debug.` option outside comments and strings in `AugmentedDescartes/`, `Solution.lean`, `Test/`, `Test.lean` and
+  `AugmentedDescartes.lean` (Challenge.lean is checked for every token except its intentional `sorry` placeholders;
+  `scripts/core_notation_audit.lean`, the registry's own audit script, is not a proof file and is outside the guard), any
+  `leanOptions`, `moreLeanArgs`, `weakLeanArgs` or `-D` in `lakefile.toml`, and any control character in the Python
+  scripts; `scripts/check_source_guard.py` runs the guard on one clean fixture, six prohibited-option fixtures and one
+  with a control byte in a script.
 - **Definitions and statements** — `scripts/check_definitions.py` compares every definition block of Challenge.lean with
   `AugmentedDescartes/Defs.lean` character for character; `scripts/check_statements.py` compares every theorem header of
   Challenge.lean with Solution.lean; `scripts/verify.py` prints every compared definition, and the type of every compared
   theorem, with `pp.all` from both modules and requires identical output, and runs Palomar's core-notation audit on every
   compared declaration.
-- **Replay** — `scripts/check_descartes.py` rebuilds every identity in the standard library, exactly where the data are
-  rational (`fractions.Fraction`) and in floating point with a fixed seed where a square root enters: the rational
-  configurations at n = 1 and n = 2 (the Lorentz Gram matrix, the matrix identity, Soddy–Gosset, the curvature–centre
-  identity, the complex Descartes theorem), the inverse identities for n = 1..8, the configuration of two hyperplanes and
-  n unit spheres for n = 1..7 with its two Apollonian reflections (the all-sphere family with curvatures
-  (1, …, 1, 2n/(n−1), 2n(n+1)/(n−1)²), decoded and checked for pairwise tangency, the two roots of the norm along the
-  admissible line, the invertibility of the base matrix), the converse of Soddy–Gosset on random null vectors made by
-  rational Qₙ-reflections (exact at n = 1, 2; float at n = 3..7), the completion of the converse of the curvature–centre
-  theorem with its uniqueness, the matrix at n = 2 that solves the equation and completes to nothing, the Mathlib
-  tangency conventions, and a control in which one moved centre breaks the identity (176 checks).
+- **Replay** — `scripts/check_descartes.py` (364 checks, no `assert`, the same verdict under `python -O`) rebuilds
+  the identities in the standard library, exactly (`fractions.Fraction`) where the data are rational and in floating
+  point with a fixed seed where a square root enters (the base configuration at n ≥ 3; the seed also drives the exact
+  random null vectors at n = 1, 2): the rational configurations at n = 1 and n = 2 (the Lorentz Gram matrix, the matrix
+  identity, Soddy–Gosset, the curvature–centre identity, the complex Descartes theorem and LMW's (2.3) in their real and
+  imaginary parts); the inverse identities for n = 1..8 and det Qₙ = −2/n for n = 1..6; the configuration of two
+  hyperplanes and n unit spheres for n = 1..7, its rows decoded and every pair, sphere–hyperplane and
+  hyperplane–hyperplane included, checked for tangency, Soddy–Gosset on it with the hyperplanes' zero curvatures, and for
+  n = 2..7 its two Apollonian reflections (the all-sphere family with curvatures (1, …, 1, 2n/(n−1), 2n(n+1)/(n−1)²),
+  decoded and checked for pairwise tangency, the two roots of the norm along the admissible line, the invertibility of
+  the base matrix); the Challenge's generator matrix Sₖ built from its formula, SₖᵀQₙSₖ = Qₙ, its row formula and the
+  curvature relation on random configurations for n = 2..6; the existence half of the converse of Soddy–Gosset on random
+  null vectors made by rational Qₙ-reflections (exact at n = 1, 2; float at n = 3..7); the completion of the converse of
+  the curvature–centre theorem recovering the original co-curvature column (n = 1..7) and rebuilding the solution from an
+  independently reflected configuration (n = 1, 2); the matrix at n = 2 that solves the equation, whose every candidate
+  completion has (0, 1) entry 0 rather than −4 and whose rows are four oriented lines that are not pairwise tangent; the
+  decoding round trips and the equivalence of the Soddy–Gosset relation with bᵀQₙb = 0 on random vectors; non-tangent
+  pairs (two unit circles at distance 3, a circle and a far line, perpendicular and like-oriented parallel lines) pairing
+  to values other than −1; the squared-distance forms of Mathlib's `IsExtTangent` and `IsIntTangent` on the rational
+  n = 2 configuration; and a control in which one moved centre breaks the identity.
 
 ## What is not checked here
 

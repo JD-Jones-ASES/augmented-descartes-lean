@@ -7,7 +7,7 @@ public import AugmentedDescartes.Apollonian
 /-!
 # Transitivity
 
-The converse of Soddy–Gosset by a `Qₙ`-reflection (ARCH.md §7). Lane `converse-sg`.
+The converse of Soddy–Gosset by a `Qₙ`-reflection (PROOF.md §7).
 -/
 
 @[expose] public section
@@ -178,9 +178,12 @@ theorem tr_exists_solution_of_isotropic {n : ℕ} (hn : 0 < n) (b : Fin (n + 2) 
     rw [← tr_col W₀ (Sum.inl 1) _ (fun i => rfl), key, tr_target_mulVec]
     simpa using hy0
 
-/-- The converse of the Soddy–Gosset theorem (LMW Theorem 3.1, existence): every nonzero `b` with
+/-- The existence half of the converse of the Soddy–Gosset theorem (LMW Theorem 3.1, which LMW state with
+"We do not know an easy proof of this result; a proof appears in [16]"; GLMWY III's arXiv versions 1–2 prove
+it as their Theorem 2.2 by the same route): every nonzero `b` with
 `(Σ bᵢ)² = n Σ bᵢ²` is the curvature vector of a pairwise tangent family of valid oriented spheres
-(`bᵢ ≠ 0`) and hyperplanes (`bᵢ = 0`). -/
+(`bᵢ ≠ 0`) and hyperplanes (`bᵢ = 0`), tangency in the signed-distance sense; the congruence half is not
+formalized. -/
 theorem converse_soddy_gosset_internal {n : ℕ} (hn : 0 < n) (b : Fin (n + 2) → ℝ) (hb : b ≠ 0)
     (h : (∑ i, b i) ^ 2 = n * ∑ i, b i ^ 2) :
     ∃ s : Fin (n + 2) → OrientedSphere n, (∀ i, OrientedSphere.IsValid (s i)) ∧
@@ -193,8 +196,9 @@ theorem converse_soddy_gosset_internal {n : ℕ} (hn : 0 < n) (b : Fin (n + 2) �
   rw [← rows_row_inl_one, ← hcol i, ← hs]
   rfl
 
-/-- The converse of the Soddy–Gosset theorem for spheres: every `b` with no zero entry and
-`(Σ bᵢ)² = n Σ bᵢ²` is the curvature vector of a pairwise tangent family of spheres. -/
+/-- The existence half of the converse of the Soddy–Gosset theorem for spheres: every `b` with no zero
+entry and `(Σ bᵢ)² = n Σ bᵢ²` is the curvature vector of a pairwise tangent family of spheres (tangency in
+the signed-distance sense). -/
 theorem converse_soddy_gosset_spheres_internal {n : ℕ} (hn : 0 < n) (b : Fin (n + 2) → ℝ) (hb : ∀ i, b i ≠ 0)
     (h : (∑ i, b i) ^ 2 = n * ∑ i, b i ^ 2) :
     ∃ x : Fin (n + 2) → EuclideanSpace ℝ (Fin n), ∃ r : Fin (n + 2) → ℝ,
@@ -254,30 +258,5 @@ theorem exists_pairwiseTangent_internal (n : ℕ) (hn : 0 < n) :
         ring)
     exact ⟨x, r, hxr⟩
 
-/-- The reflection negates its own vector. -/
-theorem tr_qReflection_mulVec_self {n : ℕ} (v : Fin (n + 2) → ℝ) (hv : v ⬝ᵥ (descartesQ n *ᵥ v) ≠ 0) :
-    qReflection v *ᵥ v = -v := by
-  unfold qReflection
-  rw [sub_mulVec, one_mulVec, smul_mulVec, vecMulVec_mulVec, op_smul_eq_smul, smul_smul,
-    dotProduct_comm (descartesQ n *ᵥ v) v, div_mul_cancel₀ _ hv, two_smul]
-  abel
-
-/-- The `Qₙ`-isometries act simply transitively on the solutions of the identity: any two solutions differ
-by exactly one isometry on the left (with `U = W' (G/2) Wᵀ Qₙ`). -/
-theorem tr_existsUnique_isometry {n : ℕ} (hn : 0 < n) (W W' : Matrix (Fin (n + 2)) (Fin 2 ⊕ Fin n) ℝ)
-    (hW : Wᵀ * descartesQ n * W = augmentedTarget n) (hW' : W'ᵀ * descartesQ n * W' = augmentedTarget n) :
-    ∃! U : Matrix (Fin (n + 2)) (Fin (n + 2)) ℝ, Uᵀ * descartesQ n * U = descartesQ n ∧ U * W = W' := by
-  obtain ⟨hVW, hWV⟩ := lor_inv_of_identity hn W hW
-  generalize ((1 / 2 : ℝ) • lorentzG n) * Wᵀ * descartesQ n = V at hVW hWV
-  refine ⟨W' * V, ⟨?_, ?_⟩, ?_⟩
-  · calc (W' * V)ᵀ * descartesQ n * (W' * V) = Vᵀ * (W'ᵀ * descartesQ n * W') * V := by
-          rw [transpose_mul]; simp only [Matrix.mul_assoc]
-      _ = Vᵀ * (Wᵀ * descartesQ n * W) * V := by rw [hW', hW]
-      _ = (W * V)ᵀ * descartesQ n * (W * V) := by
-          rw [transpose_mul W V]; simp only [Matrix.mul_assoc]
-      _ = descartesQ n := by rw [hWV, transpose_one, Matrix.one_mul, Matrix.mul_one]
-  · rw [Matrix.mul_assoc, hVW, Matrix.mul_one]
-  · rintro U ⟨-, hU⟩
-    rw [← hU, Matrix.mul_assoc, hWV, Matrix.mul_one]
 
 end AugmentedDescartes

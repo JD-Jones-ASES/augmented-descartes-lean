@@ -2,7 +2,7 @@
 version: "v0.4"
 
 project:
-  name: "The augmented Descartes theorem in every dimension, W^T Q_n W = [[0,-4,0],[-4,0,0],[0,0,2I_n]] for n + 2 pairwise tangent oriented spheres and hyperplanes, its converse, the converses of Soddy-Gosset and of the curvature-centre identity, the complex Descartes theorem, and Soddy's two spheres"
+  name: "The augmented Descartes theorem in every dimension, W^T Q_n W = [[0,-4,0],[-4,0,0],[0,0,2I_n]] for n + 2 pairwise tangent oriented spheres and hyperplanes, its converse, the existence half of Soddy-Gosset's converse, the curvature-centre converse for a nonzero first column, and Soddy's two spheres"
   description: >-
     A Lean 4 development of Section 3 of Lagarias, Mallows and Wilks, Beyond the Descartes circle theorem
     (Amer. Math. Monthly 109 (2002) 338-361), in the Lorentz form. An oriented sphere in R^n with centre x and
@@ -29,27 +29,29 @@ project:
     (2I - J)(Q_n/2) = I. Also proved: the existence half of the converse of the Soddy-Gosset theorem (every
     nonzero b with (sum b_i)^2 = n sum b_i^2 is the curvature vector of a pairwise tangent family of spheres,
     where b_i is nonzero, and hyperplanes, where b_i = 0, and of a family of spheres when no b_i vanishes),
-    the second half of LMW's Theorem 3.1, about which they write "We do not know an easy proof of this result;
-    a proof appears in [16]" ([16] is Graham-Lagarias-Mallows-Wilks-Yan III, whose arXiv versions 1-2 prove
-    both halves as their Theorem 2.2 from the same base configuration and the transitivity of the Lorentz
-    group, a section the published version omits), proved here by one Q_n-reflection from the configuration of
-    two parallel hyperplanes and n unit spheres (GLMWY III, Theorem 6.1); the congruence half is not
-    formalized. The converse of Theorem 3.2 in every dimension under the hypothesis of a nonzero first column
-    (every real M with M^T Q_n M = diag(0, 2 I_n) and a nonzero first column is the curvature-centre matrix of
-    exactly one family of valid, pairwise tangent oriented spheres and hyperplanes), which GLMWY I, Theorem 3.1
-    and its Remark, prove at n = 2 with that hypothesis and which LMW's printed converse ("any real solution
-    M") and GLMWY III's Theorem 2.3 omit, together with the matrix at n = 2 with columns 0, e_0 - e_1,
-    e_2 - e_3 (GLMWY I's configuration (3.15) with its first column zeroed), which solves the equation and is
-    the curvature-centre matrix of no family. The existence of a configuration in every dimension (GLMWY III,
-    Theorem 6.1); the Apollonian generators S_k = I + (2/(n-1)) e_k 1^T - (2n/(n-1)) e_k e_k^T of GLMWY III,
-    (4.1), preserve Q_n and carry configurations to configurations, with the row formula
-    (S_k W)_k = (2/(n-1)) sum_{i != k} W_i - W_k; and Soddy's two spheres in every dimension n >= 2 (LMW,
-    footnote 3; GLMWY III, Section 4.1), in the signed sense: the oriented spheres and hyperplanes tangent to
-    n + 1 members of a configuration are exactly the missing member and its Apollonian reflection, two distinct
-    objects whose curvatures sum to (2/(n-1)) times the sum of the others' curvatures. The planar Soddy-Gosset
-    relation with positive radii and one enclosing circle is already in Lean in facebookresearch/atlas-lean
+    the first half of the converse LMW state as Theorem 3.1, about which they write "We do not know an easy
+    proof of this result; a proof appears in [16]" ([16] is Graham-Lagarias-Mallows-Wilks-Yan III, whose arXiv
+    versions 1-2 prove both halves as their Theorem 2.2 from the same base configuration and the transitivity
+    of the Lorentz group, a section the published version omits), proved here by one Q_n-reflection from the
+    configuration of two parallel hyperplanes and n unit spheres in the proof of GLMWY III's Theorem 6.1, or
+    from its inversion in the unit sphere; the congruence half is not formalized. The converse of Theorem 3.2
+    in every dimension under the hypothesis of a nonzero first column (every real M with
+    M^T Q_n M = diag(0, 2 I_n) and a nonzero first column is the curvature-centre matrix of exactly one family
+    of valid, pairwise tangent oriented spheres and hyperplanes), which GLMWY I, Theorem 3.1 and its Remark,
+    prove at n = 2 with that hypothesis and which LMW's printed converse ("any real solution M") and GLMWY III's
+    arXiv v1-v2 Theorem 2.3 omit, together with the matrix at n = 2 with columns 0, e_0 - e_1, e_2 - e_3 (GLMWY
+    I's configuration (3.15) with its first column zeroed; the matrix of four oriented lines with normals
+    +-e_0, +-e_1), which solves the equation and is the curvature-centre matrix of no valid, pairwise tangent
+    family. The existence of a configuration in every dimension (that configuration); for n >= 2 the
+    Apollonian generators S_k = I + (2/(n-1)) e_k 1^T - (2n/(n-1)) e_k e_k^T of GLMWY III, (4.1), preserve Q_n
+    and carry configurations to configurations, with the row formula (S_k W)_k = (2/(n-1)) sum_{i != k} W_i -
+    W_k, and Soddy's two spheres (LMW, footnote 3; GLMWY III, Section 4.1), in the signed sense: the oriented
+    spheres and hyperplanes tangent to n + 1 members of a configuration are exactly the missing member and its
+    Apollonian reflection, two distinct objects whose curvatures sum to (2/(n-1)) times the sum of the others'
+    curvatures. The planar Soddy-Gosset relation for four circles of positive radius, pairwise externally
+    tangent or with one enclosing circle, is already in Lean in facebookresearch/atlas-lean
     (descartes_circle_theorem, not registered); no other formalization of these statements was found by the
-    dated search.
+    dated searches.
   authors: ["JD Jones"]
   responsible_maintainers: ["JD Jones"]
   license: "MIT"
@@ -58,10 +60,6 @@ classification:
   arxiv: ["math.MG"]
   msc2020: ["52C26", "51M04", "51B10"]
 
-# Draft for augmented-descartes-lean/formalization.yaml (registry schema v0.4), prior-art lane, RT-071, 2026-10-10.
-# Schema note: v0.4 says `id` carries the URL / DOI / arXiv id and `location` the locator inside the source;
-# the URL of each paper's read copy is repeated in `location`. Searches dated 2026-10-10 (US) = 2026-10-11 00:15-00:45 UTC.
-
 sources:
   - title: "Beyond the Descartes circle theorem"
     authors: ["Jeffrey C. Lagarias", "Colin L. Mallows", "Allan R. Wilks"]
@@ -69,8 +67,9 @@ sources:
     type: "paper"
     location: >-
       The American Mathematical Monthly 109 (2002), 338-361; read as arXiv:math/0101066v1
-      (https://arxiv.org/abs/math/0101066, the only arXiv version), printed pages: Theorem 1.2 (the Soddy-Gossett
-      theorem, (1.2)) and footnote 3, p. 3; Theorem 2.1 (the complex Descartes theorem, (2.2), (2.3)) and (2.1), p. 4;
+      (https://arxiv.org/abs/math/0101066, the only arXiv version), printed pages: Theorem 1.2 (the Soddy-Gosset
+      theorem, printed "Gossett", (1.2)) and footnote 3, p. 3; (2.1), p. 3; Theorem 2.1 (the complex Descartes theorem,
+      (2.2), (2.3)), p. 4;
       (3.1) and Theorem 3.1 (the converse to the Soddy-Gosset theorem), p. 7; Theorem 3.2 ((3.5)), p. 8; (3.7),
       Definition 3.2 ((3.8)), (3.9) and Theorem 3.3 ((3.11)), p. 9; footnote 4, p. 10; Section 8 ((8.2)-(8.4)),
       pp. 22-23. The Monthly print was not read.
@@ -83,19 +82,21 @@ sources:
       its corollaries Theorem 1.2 (Soddy-Gosset; their spelling "Gossett"), Theorem 3.2 and Theorem 2.1 with (2.3);
       the existence half of Theorem 3.1 (the congruence half is not formalized); the converse of Theorem 3.2 under
       the hypothesis of a nonzero first column, which the printed converse omits; footnote 3 (exactly two spheres
-      tangent to n + 1 members of a configuration) in signed form for n ≥ 2. n = 1 is included algebraically,
-      in the signed-radius convention, not in the convention of Section 8. The proof route is their Section 4
+      tangent to n + 1 members of a configuration) in signed form for n ≥ 2. The identity at n = 1 is Section 8's
+      (8.4), with signed radii in place of Section 8's convention for the infinite interval; the hyperplanes of n = 1
+      here (oriented points) are outside that section's text. The proof route is their Section 4
       argument (Lemmas 4.3-4.4, (4.9)-(4.10)) run directly in Euclidean coordinates, where Section 5 lifts the
       Euclidean theorem from the spherical one: the Lorentz Gram identity W G Wᵀ = 2I − J, the inverse
       (2I − J)⁻¹ = Qₙ/2, and, for the converse of Theorem 3.1, Qₙ-reflections.
   - title: "Apollonian circle packings: geometry and group theory III. Higher dimensions (arXiv versions 1 and 2)"
     authors: ["Ronald L. Graham", "Jeffrey C. Lagarias", "Colin L. Mallows", "Allan R. Wilks", "Catherine H. Yan"]
-    id: "arXiv:math/0010324v1"
+    id: "arXiv:math/0010324v2"
     type: "paper"
     location: >-
-      https://arxiv.org/abs/math/0010324v1 (2000-10-31), and v2 (2001-01-24), which keeps Section 2 with the same
-      numbering and printed pages in the normalization Qₙ = I − (1/n)𝟙𝟙ᵀ: Theorem 2.2 (the converse to the
-      Soddy-Gossett theorem: (i) existence, (ii) congruence), p. 4; Theorem 2.3 ((2.8), (2.9)), p. 5, its converse
+      https://arxiv.org/abs/math/0010324v2 (2001-01-24; v1 of 2000-10-31 has the same Section 2 with the form
+      normalized as n I − 𝟙𝟙ᵀ), in the normalization Qₙ = I − (1/n)𝟙𝟙ᵀ: Theorem 2.2 (the converse to the
+      Soddy-Gosset theorem, printed "Gossett": (i) existence, (ii) congruence), p. 4; Theorem 2.3 ((2.8), (2.9)),
+      pp. 4-5, its converse
       proof pp. 9-10; Theorem 2.4 and Lemma 2.5, pp. 11-12; the proof of Theorem 2.2, pp. 12-14. Section 2 is absent
       from v3 (2004-06-16), v4 (2005-03-11) and the journal version.
     relationship: "formalizes"
@@ -167,7 +168,24 @@ sources:
     note: >-
       The n-dimensional relation (Σ bᵢ)² = n Σ bᵢ², cited as Gosset's by LMW ([13], there titled "The Hexlet") and
       GLMWY III v1 ([14], "The Kiss Precise"). The name is Gosset (Nature's metadata for his letter "The Hexlet",
-      doi:10.1038/139251b0, Nature 139 (1937) 251-252, gives THOROLD GOSSET); LMW and GLMWY print "Gossett".
+      doi:10.1038/139251b0, Nature 139 (1937) 251-252, gives THOROLD GOSSET); LMW print "Gossett" in Theorem 1.2 and
+      "Gosset" in Theorem 3.1, and GLMWY III both.
+  - title: "The Hexlet"
+    authors: ["Thorold Gosset"]
+    id: "doi:10.1038/139251b0"
+    type: "paper"
+    location: "Nature 139 (1937), 251-252; Crossref's author metadata (THOROLD GOSSET) read, the letter not read"
+    relationship: "background"
+    author_endorsement: "n/a"
+    note: "Named only for the spelling of the author's name. Nothing is taken from it."
+  - title: "PalomarSubmission: scripts/core_notation_audit.lean (the registry's renderability audit)"
+    authors: ["PalomarRegistry (PalomarSubmission)"]
+    id: "https://github.com/PalomarRegistry/PalomarSubmission"
+    type: "other"
+    location: "scripts/core_notation_audit.lean, vendored unchanged as this repository's scripts/core_notation_audit.lean; run by scripts/verify.py on every compared declaration"
+    relationship: "other"
+    author_endorsement: "n/a"
+    note: "The registry's own audit script, copied for local use so the statements are checked here as the registry checks them. Nothing mathematical is taken from it."
   - title: "On systems of circles and spheres"
     authors: ["R. Lachlan"]
     id: "doi:10.1098/rstl.1886.0016"
@@ -240,9 +258,10 @@ sources:
     relationship: "background"
     author_endorsement: "not-contacted"
     note: >-
-      An unfinished Lean attempt at the Soddy-Gossett theorem through inversive coordinates and the Gram matrix: the
-      definitions were written, and the inverse Gram matrix step and the final statement were left open. Nothing is
-      taken from it.
+      An unfinished Lean attempt at the Soddy-Gosset theorem (the page writes Gossett) through inversive coordinates
+      and the Gram matrix: the definitions were written, the inverse Gram matrix calculation was a hole in the written
+      proof later cleared up on paper, and the preliminary lemmas and the main statement were left unproved in Lean.
+      Nothing is taken from it.
   - title: "tadamcz/annals-results: Apollonian candidate trees for arXiv:2307.02749"
     authors: ["tadamcz/annals-results"]
     id: "https://github.com/tadamcz/annals-results/tree/e37fac79bedddf40773e5e02dc5f9585247710ce/data/trees/2307.02749"
@@ -298,7 +317,7 @@ related_formalizations:
       no matrix identity, no converse, no higher dimension; unregistered. No code is shared.
   - id: "http://archive.reu.dimacs.rutgers.edu/2022/am3374/public_html/"
     relationship: "other"
-    note: "A 2022 DIMACS REU Lean attempt at the Soddy-Gossett theorem (A. Mohandas, mentor A. Kontorovich): definitions only; the inverse Gram matrix step and the main statement unfinished; no repository is linked."
+    note: "A 2022 DIMACS REU Lean attempt at the Soddy-Gosset theorem (A. Mohandas, mentor A. Kontorovich): definitions only; the preliminary lemmas and the main statement unfinished in Lean; no repository is linked."
   - id: "https://github.com/tadamcz/annals-results/tree/e37fac79bedddf40773e5e02dc5f9585247710ce/data/trees/2307.02749"
     relationship: "other"
     note: "Integral Descartes quadruples and planar Soddy replacements, algebraic only. No code is shared."
@@ -512,8 +531,9 @@ automation:
       framework: "Claude Code with parallel subagents"
       tool_setup: >-
         The project was directed by its author. Claude (Anthropic) in Claude Code was used throughout: the
-        reading of the two papers, the statements and their check against them, the exact replay of every
-        identity in the standard library, the Lean proofs, the prior-art searches and the repository text;
+        reading of the three papers as printed pages, the statements and their check against them, the exact
+        replay of the identities in the standard library, the Lean proofs, the prior-art searches and the
+        repository text;
         Claude Fable 5.1 pinned the statements, wrote the replay checker, merged the proof modules and wrote
         the documents, and Claude Opus 5.5 subagents wrote the Lean proofs, one module each, checked the
         statements against the printed pages and audited the proofs in separate passes. Lean v4.35.0-rc2 and
@@ -533,11 +553,14 @@ fidelity:
     radius, the right a unit normal with an offset, with validity (radius nonzero; normal of norm 1) a
     separate predicate; the curvature of a hyperplane is 0. Tangency is the distance encoding of LMW's oriented
     tangency (two spheres dist^2 = (r + s)^2; a sphere and a hyperplane <h, x> - delta = -r; two hyperplanes
-    opposite normals), LMW's oriented tangency taken pair by pair; the disjoint-interiors property of an
-    oriented Descartes configuration ("mutually tangent with distinct tangencies and compatible orientations")
-    is not formalized, and the converses deliver tangency in the signed-distance sense. The dimension is every
-    n >= 1 (hypothesis 0 < n, needed for Q_n), where LMW's Section 3 assumes n >= 2 and their Section 8 states
-    the identity on the line, (8.4), with the same target; the Apollonian statements assume n >= 2. The
+    opposite normals), the pairwise form of LMW's oriented tangency (GLMWY III arXiv v2, Definition 2.1); the
+    disjoint-interiors property of an oriented Descartes configuration (LMW's compatibility of orientations
+    for a whole configuration) is not formalized, and the converses deliver tangency in the signed-distance
+    sense. The dimension is every n >= 1 (hypothesis 0 < n, needed for Q_n), where LMW's Section 3 assumes
+    n >= 2 and their Section 8 states the identity on the line, (8.4), with the same target under its own
+    convention for the infinite interval; the hyperplanes of n = 1 here are oriented points, tangent when
+    their normals are opposite, which that section does not treat; the Apollonian statements assume n >= 2,
+    apollonianGen_mul_apply being false at n = 1 where Lean's 2/0 = 0 makes S_k the identity. The
     converse of Theorem 3.2 carries the hypothesis that the first column of M is nonzero, which LMW's printed
     statement omits, which GLMWY I's Theorem 3.1 carries at n = 2, and which
     curvature_center_converse_needs_nonzero shows is needed. The converse of Theorem 3.1 is formalized in its
@@ -551,8 +574,8 @@ review:
   status: "self-assessed"
   notes: >-
     No independent human expert review and no source-author endorsement is claimed; AI agents wrote the proofs
-    and audited them in separate passes, the statements were checked against the printed pages of both papers,
-    every identity is replayed exactly by scripts/check_descartes.py in the standard library, and VERIFICATION.md
+    and audited them in separate passes, the statements were checked against the printed pages of the three
+    papers, the identities are replayed by scripts/check_descartes.py in the standard library, and VERIFICATION.md
     states what is checked and what is not. Mechanical correctness and agreement of formal statements do not
     establish priority or significance: the augmented theorem, its converse, the Soddy-Gosset and
     curvature-centre theorems and the complex Descartes theorem are LMW's, and the proof route is their
@@ -560,10 +583,11 @@ review:
     refer to Graham-Lagarias-Mallows-Wilks-Yan III for proofs, and the n = 2 converse of Theorem 3.2 with its
     hypothesis is GLMWY I's Theorem 3.1; the Apollonian generators, the existence of a configuration and
     det Q_n are in GLMWY III, and the two-spheres count in LMW's footnote 3. No earlier kernel check of any of
-    these statements beyond ATLAS's planar relation was found by the dated search (Palomar's feed and day index,
-    ATLAS, Mathlib and its 1000.yaml, formal-conjectures, openai/math, LeanPool, the Isabelle AFP, Rocq's opam
-    index, HOL Light, GitHub code search in Lean, Isabelle and Coq, the arXiv listing, 2026-10-09 and
-    2026-10-10); no first is claimed beyond it.
+    these statements beyond ATLAS's planar relation was found by the dated searches (Palomar's feed and day
+    index, ATLAS, Mathlib and its 1000.yaml, formal-conjectures, openai/math, LeanPool, anthropics/formal-math,
+    the Isabelle AFP, GitHub code search in Lean, Isabelle and Coq and the arXiv listing on 2026-10-09,
+    2026-10-10 and 2026-10-11 UTC; Rocq's opam index and HOL Light on 2026-10-09 and 2026-10-10); no first is
+    claimed beyond them.
 
 
 alignment:
@@ -649,7 +673,7 @@ alignment:
       module: "Solution"
       status: "proved"
       note: "The Soddy–Gosset theorem for spheres and hyperplanes (curvature `0` for a hyperplane)."
-    - source: "LMW (3.2): the Soddy-Gosset relation as the vanishing of the Descartes form"
+    - source: "LMW p. 7: the Soddy-Gosset relation written as Q_n(b) = b^T Q_n b = 0 (the display (3.2) of Theorem 3.1)"
       lean: "AugmentedDescartes.soddy_gosset_iff_isotropic"
       module: "Solution"
       status: "proved"
@@ -694,12 +718,12 @@ alignment:
       module: "Solution"
       status: "proved"
       note: "The augmented identity for Mathlib's spheres, pairwise externally tangent (unsatisfiable at `n = 1`)."
-    - source: "GLMWY III, proof of Theorem 6.1 (the configuration with curvatures (0, 0, 1, ..., 1))"
+    - source: "The configuration in the proof of GLMWY III, Theorem 6.1 (curvatures (0, 0, 1, ..., 1)); LMW p. 7, case (iv)"
       lean: "AugmentedDescartes.exists_configuration"
       module: "Solution"
       status: "proved"
-      note: "Existence of a configuration in every dimension: two parallel hyperplanes at distance `2` and `n` unit spheres centred at `√2 eᵢ` (the configuration of GLMWY III, Theorem 6.1, stated there for `n ≥ 2`; at `n = 1` the hyperplanes are oriented points)."
-    - source: "This development (two Apollonian reflections of GLMWY III's configuration; the line at n = 1)"
+      note: "Existence of a configuration in every dimension: two parallel hyperplanes at distance `2` and `n` unit spheres centred at `√2 eᵢ` (the configuration in the proof of GLMWY III's Theorem 6.1, given there for `n ≥ 2`; at `n = 1` the hyperplanes are oriented points)."
+    - source: "This development: the curvature vector (1, ..., 1, 2n/(n-1), 2n(n+1)/(n-1)^2) through converse_soddy_gosset_spheres for n >= 2, and (1, 1, -1/2) at n = 1"
       lean: "AugmentedDescartes.exists_pairwiseTangent"
       module: "Solution"
       status: "proved"
@@ -714,16 +738,16 @@ alignment:
       module: "Solution"
       status: "proved"
       note: "The existence half of the converse of the Soddy–Gosset theorem for spheres: every `b` with no zero entry and `(Σ bᵢ)² = n Σ bᵢ²` is the curvature vector of a pairwise tangent family of spheres (tangency in the signed-distance sense)."
-    - source: "LMW Theorem 3.2, the converse ('seems more difficult, and we do not prove it here'), in every dimension with the hypothesis of a nonzero first column (GLMWY I, Theorem 3.1, at n = 2 with that hypothesis)"
+    - source: "LMW Theorem 3.2, the converse ('seems more difficult, and we do not prove it here. A proof appears in [16]'), in every dimension with the hypothesis of a nonzero first column (GLMWY I, Theorem 3.1, at n = 2 with that hypothesis; GLMWY III arXiv v1-v2, Theorem 2.3, without it)"
       lean: "AugmentedDescartes.curvature_center_converse"
       module: "Solution"
       status: "proved"
       note: "The converse of LMW Theorem 3.2 in every dimension, under the hypothesis of a nonzero first column (GLMWY I, Theorem 3.1 and its Remark, state and prove it at `n = 2` with this hypothesis; LMW's printed converse, \"any real solution `M`\", omits it): every real `M` with `Mᵀ Qₙ M = diag(0, 2 Iₙ)` and a nonzero first column is the curvature–centre matrix of exactly one family of valid, pairwise tangent oriented spheres and hyperplanes (tangency in the signed-distance sense)."
-    - source: "GLMWY I, the Remark after Theorem 3.1: the printed converse of LMW Theorem 3.2 needs the nonzero first column (the configuration (3.15) with its first column zeroed)"
+    - source: "GLMWY I, the Remark after Theorem 3.1: the printed converse of LMW Theorem 3.2 needs the nonzero first column (the configuration (3.15) with its first column zeroed: four oriented lines, not pairwise tangent)"
       lean: "AugmentedDescartes.curvature_center_converse_needs_nonzero"
       module: "Solution"
       status: "proved"
-      note: "The hypothesis of `curvature_center_converse` is needed (GLMWY I, the Remark after Theorem 3.1): at `n = 2` the matrix with columns `0, e₀ − e₁, e₂ − e₃` solves the equation and is the curvature–centre matrix of no family."
+      note: "The hypothesis of `curvature_center_converse` is needed (GLMWY I, the Remark after Theorem 3.1): at `n = 2` the matrix with columns `0, e₀ − e₁, e₂ − e₃` solves the equation and is the curvature–centre matrix of no valid, pairwise tangent family (it is the matrix of four oriented lines with normals `±e₀, ±e₁`, which are not pairwise tangent)."
     - source: "GLMWY III Section 4.1, after (4.1): the Apollonian group lies in Aut(Q_{D,n})"
       lean: "AugmentedDescartes.apollonianGen_mem_aut"
       module: "Solution"
@@ -734,7 +758,7 @@ alignment:
       module: "Solution"
       status: "proved"
       note: "Replacing sphere `k` of a configuration by its Apollonian reflection gives a configuration."
-    - source: "GLMWY III (4.1); LMW (2.1) at n = 2"
+    - source: "GLMWY III (4.1); LMW (2.1) and (2.4) at n = 2"
       lean: "AugmentedDescartes.apollonianGen_mul_apply"
       module: "Solution"
       status: "proved"

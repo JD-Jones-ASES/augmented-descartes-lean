@@ -5,7 +5,7 @@ public import AugmentedDescartes.Converse
 /-!
 # Apollonian
 
-The Apollonian generators and Soddy's two spheres (ARCH.md §5). Lane `apollonian`.
+The Apollonian generators and Soddy's two spheres (PROOF.md §5).
 -/
 
 @[expose] public section
@@ -107,30 +107,10 @@ theorem apollonian_reflection_internal {n : ℕ} (hn : 2 ≤ n) (W : Matrix (Fin
     (apollonianGen n k * W)ᵀ * descartesQ n * (apollonianGen n k * W) = augmentedTarget n :=
   lor_isometry_mul _ (apollonianGen_mem_aut_internal hn k) W hW
 
-/-- The Apollonian generators are involutions (GLMWY III, after (4.1)): `Sₖ Sₖ = 1`. -/
-theorem apo_apollonianGen_mul_self {n : ℕ} (hn : 2 ≤ n) (k : Fin (n + 2)) :
-    apollonianGen n k * apollonianGen n k = 1 := by
-  ext i j
-  rw [Matrix.mul_apply, Matrix.one_apply]
-  have h : ∀ m, apollonianGen n k i m * apollonianGen n k m j =
-      (if i = m then apollonianGen n k m j else 0) +
-        (if i = k then apo_u n k m * apollonianGen n k m j else 0) := by
-    intro m
-    rw [apo_apollonianGen_apply' hn k i m]
-    split_ifs <;> ring1
-  rw [Finset.sum_congr rfl fun m _ => h m, Finset.sum_add_distrib, Finset.sum_ite_eq,
-    apo_apollonianGen_apply' hn k i j]
-  simp only [Finset.mem_univ, ite_true]
-  by_cases hi : i = k
-  · subst hi
-    simp only [apo_apollonianGen_apply' hn, ↓reduceIte, mul_add, mul_ite, mul_one,
-      mul_zero, Finset.sum_add_distrib, Finset.sum_ite_eq', Finset.mem_univ]
-    unfold apo_u
-    split_ifs <;> subst_vars <;> first | ring1 | simp_all
-  · simp [hi]
 
 /-- The reflected row is `(2/(n−1)) Σ_{i ≠ k} (row i) − (row k)`; in particular the two curvatures
-satisfy `bₖ + bₖ' = (2/(n−1)) Σ_{i ≠ k} bᵢ` (LMW (2.1) at `n = 2`). -/
+satisfy `bₖ + bₖ' = (2/(n−1)) Σ_{i ≠ k} bᵢ` and the centre columns the like relation (LMW (2.1) and (2.4) at
+`n = 2`). -/
 theorem apollonianGen_mul_apply_internal {n : ℕ} (hn : 2 ≤ n) (W : Matrix (Fin (n + 2)) (Fin 2 ⊕ Fin n) ℝ)
     (k : Fin (n + 2)) (j : Fin 2 ⊕ Fin n) :
     (apollonianGen n k * W) k j = (2 / ((n : ℝ) - 1)) * ∑ i ∈ Finset.univ.erase k, W i j - W k j := by
@@ -189,9 +169,9 @@ theorem apo_card_erase {n : ℕ} (k : Fin (n + 2)) :
   rw [Finset.card_erase_of_mem (Finset.mem_univ k), Finset.card_univ, Fintype.card_fin,
     show n + 2 - 1 = n + 1 by omega, Nat.cast_add, Nat.cast_one]
 
-/-- Soddy's two spheres in every dimension (LMW, footnote 3; GLMWY III §4.1): the rows of Lorentz norm
-`1` pairing to `−1` with every row of a configuration but the `k`-th are exactly the `k`-th row and its
-Apollonian reflection, which are distinct. -/
+/-- Soddy's two spheres in every dimension (LMW, footnote 3; GLMWY III §4.1), in the signed sense and for
+the members of a configuration: the rows of Lorentz norm `1` pairing to `−1` with every row of a
+configuration but the `k`-th are exactly the `k`-th row and its Apollonian reflection, which are distinct. -/
 theorem two_tangent_rows_internal {n : ℕ} (hn : 2 ≤ n) (W : Matrix (Fin (n + 2)) (Fin 2 ⊕ Fin n) ℝ)
     (hW : Wᵀ * descartesQ n * W = augmentedTarget n) (k : Fin (n + 2)) :
     (∀ w : Fin 2 ⊕ Fin n → ℝ, (lorentz w w = 1 ∧ ∀ i, i ≠ k → lorentz w (W i) = -1) ↔
@@ -275,9 +255,10 @@ theorem two_tangent_rows_internal {n : ℕ} (hn : 2 ≤ n) (W : Matrix (Fin (n +
     rw [Matrix.one_apply_eq, apo_apollonianGen_apply, ite_eq_left rfl, ite_eq_left rfl, apo_diag hn] at this
     norm_num at this
 
-/-- Soddy's two spheres, geometrically: given `n + 1` members of a configuration, exactly two valid
-oriented spheres or hyperplanes are tangent to all of them, the missing member and one other, and their
-curvatures sum to `(2/(n−1)) Σ` of the others' curvatures. -/
+/-- Soddy's two spheres, geometrically (the signed count; LMW's footnote 3 counts the real spheres tangent
+to any `n + 1` mutually tangent spheres with distinct tangencies): given `n + 1` members of a configuration,
+exactly two valid oriented spheres or hyperplanes are tangent to all of them in the signed sense, the missing
+member and one other, and their curvatures sum to `(2/(n−1)) Σ` of the others' curvatures. -/
 theorem two_tangent_spheres_internal {n : ℕ} (hn : 2 ≤ n) (s : Fin (n + 2) → OrientedSphere n)
     (hv : ∀ i, OrientedSphere.IsValid (s i))
     (ht : ∀ i j, i ≠ j → OrientedSphere.Tangent (s i) (s j)) (k : Fin (n + 2)) :

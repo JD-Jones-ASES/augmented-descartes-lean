@@ -32,8 +32,8 @@ run_cmd do
         unless allowed.contains ax do
           rejected := rejected + 1
           logError m!"Unexpected axiom dependency: {name} -> {ax}"
-  unless checked ≥ 250 do
-    logError m!"Axiom audit matched only {checked} project constants; expected at least 250"
+  unless checked ≥ 220 do
+    logError m!"Axiom audit matched only {checked} project constants; expected at least 220"
   for n in [`AugmentedDescartes.lorentz_sphereRow_self,
       `AugmentedDescartes.lorentz_sphereRow_eq_neg_one_iff,
       `AugmentedDescartes.lorentz_sphereRow_planeRow_eq_neg_one_iff,

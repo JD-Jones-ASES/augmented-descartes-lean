@@ -5,7 +5,7 @@ public import AugmentedDescartes.Main
 /-!
 # Converse
 
-The converse of the augmented theorem (ARCH.md §4). Lane `converse`.
+The converse of the augmented theorem (PROOF.md §4).
 -/
 
 @[expose] public section
@@ -38,7 +38,8 @@ theorem conv_decodeRow_of_ne {n : ℕ} (w : Fin 2 ⊕ Fin n → ℝ) (hw : w (Su
   · rfl
 
 /-- The converse of LMW Theorem 3.3 (spheres and hyperplanes): every real solution is the augmented matrix
-of exactly one family of valid, pairwise tangent oriented spheres and hyperplanes. -/
+of exactly one family of valid, pairwise tangent oriented spheres and hyperplanes (tangency in the
+signed-distance sense; disjoint interiors not asserted). -/
 theorem augmented_descartes_converse_internal {n : ℕ} (hn : 0 < n) (W : Matrix (Fin (n + 2)) (Fin 2 ⊕ Fin n) ℝ)
     (hW : Wᵀ * descartesQ n * W = augmentedTarget n) :
     ∃! s : Fin (n + 2) → OrientedSphere n, (∀ i, OrientedSphere.IsValid (s i)) ∧
@@ -58,7 +59,8 @@ theorem augmented_descartes_converse_internal {n : ℕ} (hn : 0 < n) (W : Matrix
     rw [hr i, ← conv_augmentedMatrixOf_apply, htW]
 
 /-- The converse for spheres: a solution whose second column has no zero is the augmented matrix of
-exactly one pairwise tangent family of spheres, `rᵢ = 1/W i 1`, `xᵢ = (W i 2, …) / W i 1`. -/
+exactly one pairwise tangent family of spheres, `rᵢ = 1 / W i (Sum.inl 1)` and
+`xᵢ k = W i (Sum.inr k) / W i (Sum.inl 1)` (tangency in the signed-distance sense). -/
 theorem augmented_descartes_converse_spheres_internal {n : ℕ} (hn : 0 < n)
     (W : Matrix (Fin (n + 2)) (Fin 2 ⊕ Fin n) ℝ) (hW : Wᵀ * descartesQ n * W = augmentedTarget n)
     (hb : ∀ i, W i (Sum.inl 1) ≠ 0) :
@@ -90,27 +92,6 @@ theorem augmented_descartes_converse_spheres_internal {n : ℕ} (hn : 0 < n)
     have key' : ∀ i, y i = x i ∧ s i = r i := fun i => Prod.mk.inj (Sum.inl_injective (key i))
     exact Prod.ext (funext fun i => (key' i).1) (funext fun i => (key' i).2)
 
-/-- For the `Transitivity` lane: a solution's second column is the curvature vector of a valid, pairwise
-tangent family of oriented spheres and hyperplanes (the existence half of the converse, read on curvatures). -/
-theorem conv_exists_family_curvature {n : ℕ} (hn : 0 < n) (W : Matrix (Fin (n + 2)) (Fin 2 ⊕ Fin n) ℝ)
-    (hW : Wᵀ * descartesQ n * W = augmentedTarget n) :
-    ∃ s : Fin (n + 2) → OrientedSphere n, (∀ i, OrientedSphere.IsValid (s i)) ∧
-      (∀ i j, i ≠ j → OrientedSphere.Tangent (s i) (s j)) ∧
-      ∀ i, OrientedSphere.curvature (s i) = W i (Sum.inl 1) := by
-  obtain ⟨s, ⟨hv, ht, hsW⟩, -⟩ := augmented_descartes_converse_internal hn W hW
-  refine ⟨s, hv, ht, fun i => ?_⟩
-  rw [← rows_row_inl_one, ← conv_augmentedMatrixOf_apply, hsW]
 
-/-- For the `Transitivity` lane: a solution whose second column has no zero gives a pairwise tangent family
-of spheres with curvatures `1 / rᵢ = W i 1`. -/
-theorem conv_exists_spheres_curvature {n : ℕ} (hn : 0 < n) (W : Matrix (Fin (n + 2)) (Fin 2 ⊕ Fin n) ℝ)
-    (hW : Wᵀ * descartesQ n * W = augmentedTarget n) (hb : ∀ i, W i (Sum.inl 1) ≠ 0) :
-    ∃ x : Fin (n + 2) → EuclideanSpace ℝ (Fin n), ∃ r : Fin (n + 2) → ℝ,
-      PairwiseTangent x r ∧ ∀ i, 1 / r i = W i (Sum.inl 1) := by
-  obtain ⟨⟨x, r⟩, ⟨hp, hxW⟩, -⟩ := augmented_descartes_converse_spheres_internal hn W hW hb
-  refine ⟨x, r, hp, fun i => ?_⟩
-  have h := congrFun (congrFun hxW i) (Sum.inl 1)
-  rw [← h]
-  simp [augmentedMatrix, sphereRow]
 
 end AugmentedDescartes

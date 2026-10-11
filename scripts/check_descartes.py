@@ -1,12 +1,13 @@
 #!/usr/bin/env python3
-"""Standard-library replay of every identity behind the compared statements (the finder/checker split:
-the Lean development is the trust chain, this script the independent second implementation). Standard library only. Exact arithmetic (fractions.Fraction)
-wherever the data are rational; floats with sqrt only for the base configuration W0(n), which is
-irrational by Hasse-Minkowski at n = 3. Prints one verdict line per check and ends with PROBE: PASS/FAIL.
+"""Standard-library replay of the identities behind the compared statements of Challenge.lean (the finder/checker
+split: the Lean development is the trust chain, this script the independent second implementation, exact
+arithmetic (fractions.Fraction) wherever the data are rational, floating point with a fixed seed where a square
+root enters: the base configuration is irrational by the determinant condition of GLMWY III, Lemmas 6.4-6.5).
+Prints one line per check and ends with VERDICT: PASS or VERDICT: FAIL; no check uses assert.
 
 Conventions (rows are augmented curvature-centre coordinates, LMW Def 3.2):
   sphere  (centre x, signed radius r != 0):  (|x|^2/r - r, 1/r, x/r)
-  plane   (unit normal h, offset d: <h,y> = d): (2d, 0, h)              -- LMW (3.9), bbar = 2d
+  plane   (unit normal h, offset d: <h,y> = d): (2d, 0, h)              -- LMW (3.9), bbar = 2d (GLMWY I p. 8)
   Lorentz pairing <u,v> = -(u0 v1 + u1 v0)/2 + sum_k u_k v_k            -- G = [[0,-1/2],[-1/2,0]] + I_n
   Q_n = I - (1/n) J on R^{n+2};  target T = [[0,-4,0],[-4,0,0],[0,0,2I_n]] = 2 G^{-1}
 """
@@ -159,10 +160,11 @@ def check_exact_configs():
         say(sum(b) ** 2 == n * sum(t * t for t in b), f"H1 n={n}: Soddy-Gosset (sum b)^2 = n sum b^2 (exact)")
         if n == 2:
             # complex Descartes: z_i = x + i y;  (sum b z)^2 = 2 sum (b z)^2
-            bz = [complex(float(w[2]), float(w[3])) for w in W]  # rows already carry b x
-            lhs = sum(bz) ** 2
-            rhs = 2 * sum(z * z for z in bz)
-            say(abs(lhs - rhs) < 1e-12, "H1 n=2: complex Descartes (sum bz)^2 = 2 sum (bz)^2")
+            bx = [w[2] for w in W]  # rows already carry b x and b y
+            by = [w[3] for w in W]
+            re_l, im_l = sum(bx) ** 2 - sum(by) ** 2, 2 * sum(bx) * sum(by)
+            re_r, im_r = 2 * sum(bx[i] ** 2 - by[i] ** 2 for i in range(4)), 4 * sum(bx[i] * by[i] for i in range(4))
+            say(re_l == re_r and im_l == im_r, "H1 n=2: complex Descartes (sum bz)^2 = 2 sum (bz)^2 (exact, real and imaginary parts)")
         # the curvature-centre matrix M (LMW Thm 3.2): M^T Q M = diag(0, 2I)
         M = [w[1:] for w in W]
         MtQM = matmul(matmul(transpose(M), Qmat(n)), M)
@@ -301,7 +303,7 @@ def complete_from_curvatures(n, b, W0, exact):
         R = q_reflection(n, v, exact)
         return matmul(R, W0)
     pair2 = qform(n, bbar0, b, exact)
-    assert (pair2 != 0) if exact else abs(pair2) > 1e-9, "both pairings vanish: impossible for b != 0"
+    say((pair2 != 0) if exact else abs(pair2) > 1e-9, f"H3 n={n}: a pairing with b0 or with bbar0 is nonzero (b != 0)")
     # swap the two hyperbolic columns of W0 (T is symmetric under the swap), then reflect
     W0s = [[w[1], w[0]] + w[2:] for w in W0]
     v = [p - q for p, q in zip(bbar0, b)]
@@ -319,7 +321,7 @@ def check_converse_soddy_gosset():
                 b = random_null_exact(n)
             else:
                 b = [float(t) for t in random_null_exact(n)]
-            assert any(t != 0 for t in b)
+            say(any(t != 0 for t in b), f"H3 n={n} trial {trial}: the random null vector is nonzero")
             W = complete_from_curvatures(n, b, W0, exact)
             scale = max(1.0, max(abs(float(t)) for w in W for t in w)) ** 2
             ok, d = identity_holds(W, n, exact=exact, tol=1e-9 * scale)
@@ -353,11 +355,11 @@ def complete_curvature_centre(n, M, exact):
     P = mat(m, m, lambda i, j: (1 if i == j else 0) - sum(V[i][k] * VtQ[k][j] for k in range(n)) / 2)
     Qb = [sum(Q[i][j] * b[j] for j in range(m)) for i in range(m)]
     ell = max(range(m), key=lambda i: abs(Qb[i]))
-    assert (Qb[ell] != 0) if exact else abs(Qb[ell]) > 1e-9
+    say((Qb[ell] != 0) if exact else abs(Qb[ell]) > 1e-9, f"H4 n={n}: Q b != 0 for a nonzero first column")
     z = [P[i][ell] for i in range(m)]
     zb = qform(n, z, b, exact)
     zz = qform(n, z, z, exact)
-    assert (zb != 0) if exact else abs(zb) > 1e-9
+    say((zb != 0) if exact else abs(zb) > 1e-9, f"H4 n={n}: <z, b> != 0 for z = P e_l")
     bbar = [(-4 / zb) * (z[i] - (zz / (2 * zb)) * b[i]) for i in range(m)]
     return bbar
 
@@ -381,8 +383,17 @@ def check_converse_thm32():
     MtQM = matmul(matmul(transpose(M0), Qmat(n)), M0)
     D = mat(3, 3, lambda i, j: 2 if (i == j and i > 0) else 0)
     say(maxdiff(MtQM, D) == 0, "H4: M0 = [0 | e0-e1 | e2-e3] satisfies M^T Q_2 M = diag(0,2,2)")
-    # any completion needs <bbar, 0>_Q = -4: impossible; and no row of M0 is a sphere or a unit-normal plane pair
-    say(True, "H4: no completion exists (the (0,1) entry would be <bbar, 0>_Q = 0 != -4): the hypothesis b != 0 is needed")
+    # a completion W = [bbar | 0 | V] would need (W^T Q W)[0][1] = <bbar, 0>_Q = -4; compute it for twenty bbar
+    b0 = [Fr(0)] * 4
+    entries = set()
+    for _ in range(20):
+        bbar = [Fr(random.randint(-9, 9), random.randint(1, 5)) for _ in range(4)]
+        entries.add(qform(n, bbar, b0))
+    say(entries == {Fr(0)}, "H4: every completion of M0 has (0,1) entry <bbar, 0>_Q = 0, never -4: the hypothesis b != 0 is needed")
+    # the rows of M0 are four oriented lines with normals +-e0, +-e1; perpendicular lines are not tangent
+    dec0 = [decode_row([Fr(0)] + row) for row in M0]
+    say(all(d_[0] == "plane" for d_ in dec0) and not all(geometric_tangent(dec0[i], dec0[j]) for i in range(4) for j in range(4) if i != j),
+        "H4: M0 is the curvature-centre matrix of four oriented lines that are not pairwise tangent")
 
 
 # ---------- H6: Mathlib Sphere conventions ----------
@@ -413,6 +424,125 @@ def check_control():
     say(not ok, "control: perturbing one centre breaks the identity")
 
 
+# ---------- the statements the earlier checks did not exercise ----------
+def random_config(n, exact):
+    """A random configuration: W0 moved by a random Q_n-reflection (exact at n <= 2)."""
+    W0 = {1: config_n1(), 2: config_n2()}.get(n) if exact else base_config(n)
+    m = n + 2
+    for _ in range(2):
+        v = [Fr(random.randint(-3, 3)) if exact else float(random.randint(-3, 3)) for _ in range(m)]
+        if (qform(n, v, v, exact) == 0) if exact else abs(qform(n, v, v, exact)) < 1e-9:
+            continue
+        W0 = matmul(q_reflection(n, v, exact), W0)
+    return W0
+
+
+def apollonian_gen(n, k, exact):
+    """The Challenge's apollonianGen: S_k = 1 + (2/(n-1)) e_k 1^T - (2n/(n-1)) e_k e_k^T."""
+    m = n + 2
+    a = Fr(2, n - 1) if exact else 2.0 / (n - 1)
+    c = Fr(2 * n, n - 1) if exact else 2.0 * n / (n - 1)
+    return mat(m, m, lambda i, j: (1 if i == j else 0) + (a if i == k else 0) - (c if (i == k and j == k) else 0))
+
+
+def check_remaining():
+    # theorem 7 row_injOn_valid and the decoding: row(decode(w)) = w and decode(row(s)) = s on the n = 2 rows
+    W = config_n2()
+    for w in W:
+        d = decode_row(w)
+        back = sphere_row(d[1], d[2]) if d[0] == "sphere" else plane_row(d[1], d[2])
+        say(back == w, "T7/T8: row(decode(w)) = w on a sphere row (exact)")
+    h = [Fr(3, 5), Fr(4, 5)]
+    w = plane_row(h, Fr(7, 3))
+    d = decode_row(w)
+    say(d == ("plane", h, Fr(7, 3)), "T7/T8: decode(planeRow h d) = (h, d) on a unit-normal plane row (exact)")
+    # theorem 17: (sum b)^2 = n sum b^2 <-> b^T Q_n b = 0, on null and non-null vectors
+    for n in range(1, 6):
+        for _ in range(4):
+            b = [Fr(random.randint(-4, 4)) for _ in range(n + 2)]
+            lhs = (sum(b) ** 2 == n * sum(t * t for t in b))
+            rhs = (qform(n, b, b) == 0)
+            say(lhs == rhs, f"T17 n={n}: the Soddy-Gosset relation holds iff b^T Q_n b = 0 (exact; here {'both' if lhs else 'neither'})")
+        bnull = random_null_exact(n)
+        say(sum(bnull) ** 2 == n * sum(t * t for t in bnull) and qform(n, bnull, bnull) == 0, f"T17 n={n}: a random null vector satisfies both forms (exact)")
+    # theorem 21: LMW (2.3) sum b (b z) = (1/2)(sum b)(sum b z) at n = 2, exact in the real and imaginary parts
+    W = config_n2()
+    bb = [w[1] for w in W]
+    bx = [w[2] for w in W]
+    by = [w[3] for w in W]
+    say(sum(bb[i] * bx[i] for i in range(4)) == Fr(1, 2) * sum(bb) * sum(bx) and sum(bb[i] * by[i] for i in range(4)) == Fr(1, 2) * sum(bb) * sum(by),
+        "T21: LMW (2.3) sum b (b z) = (1/2)(sum b)(sum b z) on the n = 2 configuration (exact)")
+    # theorem 22: det Q_n = -2/n exactly, n = 1..6 (Bareiss)
+    for n in range(1, 7):
+        say(det_exact(Qmat(n)) == Fr(-2, n), f"T22: det Q_{n} = -2/{n} (exact)")
+    # theorems 32, 34: the Challenge's S_k matrix preserves Q_n and its row k is the reflected row
+    for n in range(2, 7):
+        exact = n <= 2
+        W = random_config(n, exact)
+        for k in (0, n + 1):
+            S = apollonian_gen(n, k, exact)
+            StQS = matmul(matmul(transpose(S), Qmat(n, exact)), S)
+            d = maxdiff(StQS, Qmat(n, exact))
+            say((d == 0) if exact else d < 1e-9, f"T32 n={n} k={k}: S_k^T Q_n S_k = Q_n for the Challenge's apollonianGen")
+            SW = matmul(S, W)
+            R = reflect_row(W, k, n)
+            d2 = maxdiff(SW, R)
+            say((d2 == 0) if exact else d2 < 1e-8, f"T34 n={n} k={k}: (S_k W) k = (2/(n-1)) sum_{{i != k}} W i - W k, other rows fixed")
+            # the curvature relation b_k + b_k' = (2/(n-1)) sum_{i != k} b_i on a random configuration
+            bk, bk2 = W[k][1], SW[k][1]
+            rhs = (Fr(2, n - 1) if exact else 2.0 / (n - 1)) * sum(W[i][1] for i in range(n + 2) if i != k)
+            say((bk + bk2 == rhs) if exact else abs(bk + bk2 - rhs) < 1e-8, f"T35/T36 n={n} k={k}: b_k + b_k' = (2/(n-1)) sum of the others (random configuration)")
+    # theorems 2, 3, 4, 6: non-tangent pairs do not pair to -1
+    u = sphere_row([Fr(0), Fr(0)], Fr(1))
+    v = sphere_row([Fr(3), Fr(0)], Fr(1))
+    say(lorentz(u, v) != -1, "T2: two unit circles at distance 3 (not tangent) pair to " + str(lorentz(u, v)) + ", not -1")
+    pl = plane_row([Fr(1), Fr(0)], Fr(5))
+    say(lorentz(u, pl) != -1, "T3: the unit circle at 0 and the line x = 5 (not tangent) pair to " + str(lorentz(u, pl)) + ", not -1")
+    say(lorentz(pl, plane_row([Fr(0), Fr(1)], Fr(0))) != -1, "T4: perpendicular lines pair to 0, not -1")
+    say(lorentz(pl, plane_row([Fr(1), Fr(0)], Fr(-2))) == 1, "T4: parallel lines with the same normal pair to 1, not -1")
+    # the base configuration's own sphere-plane tangencies, decoded and checked (float); Soddy-Gosset with planes
+    for n in range(1, 6):
+        W0 = base_config(n)
+        dec = [decode_row(w, exact=False) for w in W0]
+        kinds = "".join("s" if d_[0] == "sphere" else "p" for d_ in dec)
+        say(kinds == "s" * n + "pp" and all(geometric_tangent(dec[i], dec[j], exact=False) for i in range(n + 2) for j in range(n + 2) if i != j),
+            f"T3/T6/T16 n={n}: W0's rows decode to {kinds} and every pair, sphere-plane and plane-plane included, is tangent geometrically")
+        b = [w[1] for w in W0]
+        say(abs(sum(b) ** 2 - n * sum(t * t for t in b)) < 1e-9, f"T16 n={n}: Soddy-Gosset on W0 with its two hyperplanes (curvature 0)")
+    # uniqueness of the decoded family: two valid objects with the same row are equal (the decoding is a function of the row)
+    W = config_n2()
+    say(all(decode_row(W[i]) == decode_row(list(W[i])) for i in range(4)) and len({tuple(w) for w in W}) == 4,
+        "T13/T14: the family is determined by W (decoding is a function of the rows; the four rows are distinct)")
+    # theorem 30 on an independently built M: start from a null b and random Q-orthonormal centre columns? use a configuration's M at n = 1, 2 then perturb bbar and recover
+    for n in (1, 2):
+        W = random_config(n, True)
+        M = [w[1:] for w in W]
+        bbar = complete_curvature_centre(n, M, True)
+        W2 = [[bbar[i]] + M[i] for i in range(n + 2)]
+        ok, _ = identity_holds(W2, n)
+        say(ok and bbar == [w[0] for w in W], f"T30 n={n}: the completion of M rebuilds the unique solution W (exact, random configuration)")
+
+
+def det_exact(A):
+    """Bareiss determinant over Fractions."""
+    A = [list(r) for r in A]
+    m = len(A)
+    sign = 1
+    prev = Fr(1)
+    for k in range(m - 1):
+        if A[k][k] == 0:
+            sw = next((i for i in range(k + 1, m) if A[i][k] != 0), None)
+            if sw is None:
+                return Fr(0)
+            A[k], A[sw] = A[sw], A[k]
+            sign = -sign
+        for i in range(k + 1, m):
+            for j in range(k + 1, m):
+                A[i][j] = (A[i][j] * A[k][k] - A[i][k] * A[k][j]) / prev
+        prev = A[k][k]
+    return sign * A[m - 1][m - 1]
+
+
 if __name__ == "__main__":
     check_exact_configs()
     check_inverses()
@@ -420,6 +550,7 @@ if __name__ == "__main__":
     check_converse_soddy_gosset()
     check_converse_thm32()
     check_sphere_bridge()
+    check_remaining()
     check_control()
     print(f"{len(FAILS)} failures")
     print(f"VERDICT: {'PASS' if not FAILS else 'FAIL'}")

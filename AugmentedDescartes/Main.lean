@@ -5,7 +5,7 @@ public import AugmentedDescartes.Lorentz
 /-!
 # Main
 
-The forward theorems: the identity, Soddy–Gosset, the curvature–centre identity (ARCH.md §3). Lane `main`.
+The forward theorems: the identity, Soddy–Gosset, the curvature–centre identity (PROOF.md §3).
 -/
 
 @[expose] public section
@@ -70,8 +70,8 @@ theorem augmented_descartes_general_internal {n : ℕ} (hn : 0 < n) (s : Fin (n 
   · exact lorentz_row_self_internal (s i) (hv i)
   · exact (lorentz_row_eq_neg_one_iff_internal (s i) (s j) (hv i) (hv j)).2 (ht i j hij)
 
-/-- The augmented Euclidean Descartes theorem (LMW Theorem 3.3) for spheres of nonzero curvature:
-`Wᵀ Qₙ W = [[0, −4, 0], [−4, 0, 0], [0, 0, 2 Iₙ]]`. -/
+/-- The augmented Euclidean Descartes theorem (LMW Theorem 3.3; (8.4) at `n = 1`) for spheres of nonzero
+curvature: `Wᵀ Qₙ W = [[0, −4, 0], [−4, 0, 0], [0, 0, 2 Iₙ]]`. -/
 theorem augmented_descartes_internal {n : ℕ} (hn : 0 < n) (x : Fin (n + 2) → EuclideanSpace ℝ (Fin n))
     (r : Fin (n + 2) → ℝ) (h : PairwiseTangent x r) :
     (augmentedMatrix x r)ᵀ * descartesQ n * augmentedMatrix x r = augmentedTarget n :=
@@ -86,7 +86,8 @@ theorem soddy_gosset_general_internal {n : ℕ} (hn : 0 < n) (s : Fin (n + 2) �
   have h := main_soddy_gosset_of_identity hn _ (augmented_descartes_general_internal hn s hv ht)
   simpa only [augmentedMatrixOf, Matrix.of_apply, rows_row_inl_one] using h
 
-/-- The Soddy–Gosset theorem (LMW Theorem 3.1, (1.2)): `(Σ 1/rᵢ)² = n Σ (1/rᵢ)²`. -/
+/-- The Soddy–Gosset theorem (LMW Theorem 1.2, (1.2); Soddy 1936, Gosset 1937, Lachlan 1886 at `n = 3`):
+`(Σ 1/rᵢ)² = n Σ (1/rᵢ)²`. -/
 theorem soddy_gosset_internal {n : ℕ} (hn : 0 < n) (x : Fin (n + 2) → EuclideanSpace ℝ (Fin n))
     (r : Fin (n + 2) → ℝ) (h : PairwiseTangent x r) :
     (∑ i, 1 / r i) ^ 2 = n * ∑ i, (1 / r i) ^ 2 :=
@@ -129,183 +130,5 @@ theorem curvature_center_internal {n : ℕ} (hn : 0 < n) (x : Fin (n + 2) → Eu
       curvatureCenterTarget n := by
   rw [main_curvatureCenterMatrix_eq]
   exact curvature_center_general_internal hn _ (fun i => h.1 i) (fun i j hij => h.2 i j hij)
-
-/-! ## Extras for `Corollaries`: the centre block in coordinates and the complex Descartes theorem -/
-
-/-- The `(inr k, inr l)` entry for spheres: `Σ (bᵢ xᵢₖ)(bᵢ xᵢₗ) − (1/n)(Σ bᵢ xᵢₖ)(Σ bᵢ xᵢₗ) = 2 δₖₗ`. -/
-theorem main_center_entry {n : ℕ} (hn : 0 < n) (x : Fin (n + 2) → EuclideanSpace ℝ (Fin n))
-    (r : Fin (n + 2) → ℝ) (h : PairwiseTangent x r) (k l : Fin n) :
-    ∑ i, x i k / r i * (x i l / r i) - (n : ℝ)⁻¹ * ((∑ i, x i k / r i) * ∑ i, x i l / r i) =
-      if k = l then 2 else 0 := by
-  have e := congrFun (congrFun (augmented_descartes_internal hn x r h) (Sum.inr k)) (Sum.inr l)
-  rw [main_entry] at e
-  simpa [augmentedMatrix, sphereRow, augmentedTarget, Matrix.diagonal_apply] using e
-
-/-- The `(inl 1, inr k)` entry for spheres: `Σ bᵢ (bᵢ xᵢₖ) − (1/n)(Σ bᵢ)(Σ bᵢ xᵢₖ) = 0`. -/
-theorem main_mixed_entry {n : ℕ} (hn : 0 < n) (x : Fin (n + 2) → EuclideanSpace ℝ (Fin n))
-    (r : Fin (n + 2) → ℝ) (h : PairwiseTangent x r) (k : Fin n) :
-    ∑ i, 1 / r i * (x i k / r i) - (n : ℝ)⁻¹ * ((∑ i, 1 / r i) * ∑ i, x i k / r i) = 0 := by
-  have e := congrFun (congrFun (augmented_descartes_internal hn x r h) (Sum.inl 1)) (Sum.inr k)
-  rw [main_entry] at e
-  simpa [augmentedMatrix, sphereRow, augmentedTarget] using e
-
-theorem main_sq_ofReal_add_mul_I (a b : ℝ) :
-    ((a : ℂ) + (b : ℂ) * Complex.I) ^ 2 = ((a ^ 2 - b ^ 2 : ℝ) : ℂ) + ((2 * a * b : ℝ) : ℂ) * Complex.I := by
-  push_cast
-  ring_nf
-  rw [Complex.I_sq]
-  ring
-
-theorem main_sum_ofReal_add_mul_I {ι : Type*} (s : Finset ι) (u v : ι → ℝ) :
-    ∑ i ∈ s, ((u i : ℂ) + (v i : ℂ) * Complex.I) =
-      ((∑ i ∈ s, u i : ℝ) : ℂ) + ((∑ i ∈ s, v i : ℝ) : ℂ) * Complex.I := by
-  push_cast
-  rw [Finset.sum_add_distrib, Finset.sum_mul]
-
-theorem main_complex_aux (u v : Fin (2 + 2) → ℝ)
-    (huu : ∑ i, u i * u i - (2 : ℝ)⁻¹ * ((∑ i, u i) * ∑ i, u i) = 2)
-    (hvv : ∑ i, v i * v i - (2 : ℝ)⁻¹ * ((∑ i, v i) * ∑ i, v i) = 2)
-    (huv : ∑ i, u i * v i - (2 : ℝ)⁻¹ * ((∑ i, u i) * ∑ i, v i) = 0) :
-    (∑ i, ((u i : ℂ) + (v i : ℂ) * Complex.I)) ^ 2 =
-      2 * ∑ i, ((u i : ℂ) + (v i : ℂ) * Complex.I) ^ 2 := by
-  simp_rw [main_sq_ofReal_add_mul_I]
-  rw [main_sum_ofReal_add_mul_I, main_sum_ofReal_add_mul_I, main_sq_ofReal_add_mul_I]
-  have hre : (∑ i, u i) ^ 2 - (∑ i, v i) ^ 2 = 2 * ∑ i, (u i ^ 2 - v i ^ 2) := by
-    rw [Finset.sum_sub_distrib]
-    simp only [sq]
-    linear_combination (-2 : ℝ) * huu + 2 * hvv
-  have him : 2 * (∑ i, u i) * (∑ i, v i) = 2 * ∑ i, 2 * u i * v i := by
-    have : ∑ i, 2 * u i * v i = 2 * ∑ i, u i * v i := by
-      rw [Finset.mul_sum]
-      exact Finset.sum_congr rfl (fun i _ => by ring)
-    rw [this]
-    linear_combination (-4 : ℝ) * huv
-  rw [hre, him]
-  push_cast
-  ring
-
-theorem main_complex_mixed_aux (b u v : Fin (2 + 2) → ℝ)
-    (hu : ∑ i, b i * u i - (2 : ℝ)⁻¹ * ((∑ i, b i) * ∑ i, u i) = 0)
-    (hv : ∑ i, b i * v i - (2 : ℝ)⁻¹ * ((∑ i, b i) * ∑ i, v i) = 0) :
-    ∑ i, (b i : ℂ) * ((u i : ℂ) + (v i : ℂ) * Complex.I) =
-      (1 / 2) * (∑ i, (b i : ℂ)) * ∑ i, ((u i : ℂ) + (v i : ℂ) * Complex.I) := by
-  rw [main_sum_ofReal_add_mul_I]
-  have e : ∀ i, (b i : ℂ) * ((u i : ℂ) + (v i : ℂ) * Complex.I) =
-      ((b i * u i : ℝ) : ℂ) + ((b i * v i : ℝ) : ℂ) * Complex.I := by
-    intro i; push_cast; ring
-  simp_rw [e]
-  rw [main_sum_ofReal_add_mul_I]
-  have h1 : ∑ i, b i * u i = (1 / 2) * (∑ i, b i) * ∑ i, u i := by linear_combination hu
-  have h2 : ∑ i, b i * v i = (1 / 2) * (∑ i, b i) * ∑ i, v i := by linear_combination hv
-  rw [h1, h2]
-  push_cast
-  ring
-
-theorem main_complex_term (x : Fin (2 + 2) → EuclideanSpace ℝ (Fin 2)) (r : Fin (2 + 2) → ℝ)
-    (i : Fin (2 + 2)) :
-    ((x i 0 : ℂ) + (x i 1 : ℂ) * Complex.I) / r i =
-      ((x i 0 / r i : ℝ) : ℂ) + ((x i 1 / r i : ℝ) : ℂ) * Complex.I := by
-  push_cast
-  ring
-
-/-- The complex Descartes theorem (LMW Theorem 2.1, (2.2)), for `Corollaries`. -/
-theorem main_complex_descartes (x : Fin (2 + 2) → EuclideanSpace ℝ (Fin 2)) (r : Fin (2 + 2) → ℝ)
-    (h : PairwiseTangent x r) :
-    (∑ i, ((x i 0 : ℂ) + (x i 1 : ℂ) * Complex.I) / r i) ^ 2 =
-      2 * ∑ i, (((x i 0 : ℂ) + (x i 1 : ℂ) * Complex.I) / r i) ^ 2 := by
-  have e00 := main_center_entry (by norm_num) x r h 0 0
-  have e11 := main_center_entry (by norm_num) x r h 1 1
-  have e01 := main_center_entry (by norm_num) x r h 0 1
-  rw [ite_eq_left rfl] at e00 e11
-  rw [ite_eq_right (by decide)] at e01
-  simp only [Nat.cast_ofNat] at e00 e11 e01
-  simp_rw [main_complex_term x r]
-  exact main_complex_aux (fun i => x i 0 / r i) (fun i => x i 1 / r i) e00 e11 e01
-
-/-- LMW (2.3): `Σ bᵢ (bᵢ zᵢ) = ½ (Σ bᵢ)(Σ bᵢ zᵢ)`, for `Corollaries`. -/
-theorem main_complex_descartes_mixed (x : Fin (2 + 2) → EuclideanSpace ℝ (Fin 2)) (r : Fin (2 + 2) → ℝ)
-    (h : PairwiseTangent x r) :
-    ∑ i, (1 / r i : ℂ) * (((x i 0 : ℂ) + (x i 1 : ℂ) * Complex.I) / r i) =
-      (1 / 2) * (∑ i, (1 / r i : ℂ)) * ∑ i, ((x i 0 : ℂ) + (x i 1 : ℂ) * Complex.I) / r i := by
-  have e0 := main_mixed_entry (by norm_num) x r h 0
-  have e1 := main_mixed_entry (by norm_num) x r h 1
-  simp only [Nat.cast_ofNat] at e0 e1
-  simp_rw [main_complex_term x r]
-  have hb : ∀ i, (1 / r i : ℂ) = ((1 / r i : ℝ) : ℂ) := by intro i; push_cast; ring
-  simp_rw [hb]
-  exact main_complex_mixed_aux (fun i => 1 / r i) (fun i => x i 0 / r i) (fun i => x i 1 / r i) e0 e1
-
-/-! ## Extras for `Corollaries`: Mathlib's spheres -/
-
-theorem main_pairwiseTangent_of_isExtTangent {n : ℕ}
-    (s : Fin (n + 2) → EuclideanGeometry.Sphere (EuclideanSpace ℝ (Fin n)))
-    (hr : ∀ i, 0 < (s i).radius)
-    (ht : ∀ i j, i ≠ j → EuclideanGeometry.Sphere.IsExtTangent (s i) (s j)) :
-    PairwiseTangent (fun i => (s i).center) (fun i => (s i).radius) :=
-  ⟨fun i => (hr i).ne', fun i j hij => by rw [(ht i j hij).dist_center]⟩
-
-theorem main_pairwiseTangent_enclosing {n : ℕ}
-    (s : Fin (n + 2) → EuclideanGeometry.Sphere (EuclideanSpace ℝ (Fin n))) (e : Fin (n + 2))
-    (hr : ∀ i, 0 < (s i).radius)
-    (hint : ∀ j, j ≠ e → EuclideanGeometry.Sphere.IsIntTangent (s j) (s e))
-    (hext : ∀ i j, i ≠ e → j ≠ e → i ≠ j → EuclideanGeometry.Sphere.IsExtTangent (s i) (s j)) :
-    PairwiseTangent (fun i => (s i).center)
-      (fun i => if i = e then -(s i).radius else (s i).radius) := by
-  refine ⟨fun i => ?_, fun i j hij => ?_⟩
-  · have := (hr i).ne'
-    dsimp only
-    split_ifs
-    · exact neg_ne_zero.2 this
-    · exact this
-  · by_cases hi : i = e
-    · subst hi
-      have hj : j ≠ i := fun h => hij h.symm
-      simp only [hj, ↓reduceIte]
-      rw [dist_comm, (hint j hj).dist_center]
-      ring
-    · by_cases hj : j = e
-      · subst hj
-        simp only [hi, ↓reduceIte]
-        rw [(hint i hi).dist_center]
-        ring
-      · simp only [hi, hj, ↓reduceIte]
-        rw [(hext i j hi hj hij).dist_center]
-
-/-- Soddy–Gosset for Mathlib's spheres, pairwise externally tangent, for `Corollaries`. -/
-theorem main_sphere_soddy_gosset {n : ℕ} (hn : 0 < n)
-    (s : Fin (n + 2) → EuclideanGeometry.Sphere (EuclideanSpace ℝ (Fin n)))
-    (hr : ∀ i, 0 < (s i).radius)
-    (ht : ∀ i j, i ≠ j → EuclideanGeometry.Sphere.IsExtTangent (s i) (s j)) :
-    (∑ i, 1 / (s i).radius) ^ 2 = n * ∑ i, (1 / (s i).radius) ^ 2 :=
-  soddy_gosset_internal hn _ _ (main_pairwiseTangent_of_isExtTangent s hr ht)
-
-/-- Soddy–Gosset with one enclosing sphere, for `Corollaries`. -/
-theorem main_sphere_soddy_gosset_enclosing {n : ℕ} (hn : 0 < n)
-    (s : Fin (n + 2) → EuclideanGeometry.Sphere (EuclideanSpace ℝ (Fin n))) (e : Fin (n + 2))
-    (hr : ∀ i, 0 < (s i).radius)
-    (hint : ∀ j, j ≠ e → EuclideanGeometry.Sphere.IsIntTangent (s j) (s e))
-    (hext : ∀ i j, i ≠ e → j ≠ e → i ≠ j → EuclideanGeometry.Sphere.IsExtTangent (s i) (s j)) :
-    (∑ i, (if i = e then -1 else 1) / (s i).radius) ^ 2 =
-      n * ∑ i, ((if i = e then -1 else 1) / (s i).radius) ^ 2 := by
-  have h := soddy_gosset_internal hn _ _ (main_pairwiseTangent_enclosing s e hr hint hext)
-  have hf : (fun i => 1 / (if i = e then -(s i).radius else (s i).radius)) =
-      fun i => (if i = e then -1 else 1) / (s i).radius := by
-    funext i
-    split_ifs
-    · rw [one_div_neg_eq_neg_one_div, neg_div]
-    · rfl
-  have h1 : ∀ i, 1 / (if i = e then -(s i).radius else (s i).radius) =
-      (if i = e then -1 else 1) / (s i).radius := fun i => congrFun hf i
-  simp only [h1] at h
-  exact h
-
-/-- The augmented identity for Mathlib's spheres, pairwise externally tangent, for `Corollaries`. -/
-theorem main_sphere_augmented_descartes {n : ℕ} (hn : 0 < n)
-    (s : Fin (n + 2) → EuclideanGeometry.Sphere (EuclideanSpace ℝ (Fin n)))
-    (hr : ∀ i, 0 < (s i).radius)
-    (ht : ∀ i j, i ≠ j → EuclideanGeometry.Sphere.IsExtTangent (s i) (s j)) :
-    (augmentedMatrix (fun i => (s i).center) (fun i => (s i).radius))ᵀ * descartesQ n *
-      augmentedMatrix (fun i => (s i).center) (fun i => (s i).radius) = augmentedTarget n :=
-  augmented_descartes_internal hn _ _ (main_pairwiseTangent_of_isExtTangent s hr ht)
 
 end AugmentedDescartes

@@ -91,6 +91,6 @@
    "inputRev": "v4.35.0-rc2",
    "inherited": true,
    "configFile": "lakefile.toml"}],
- "name": "finiteQuantumDesignsLean",
+ "name": "augmentedDescartesLean",
  "lakeDir": ".lake",
  "fixedToolchain": false}

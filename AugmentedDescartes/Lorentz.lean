@@ -5,7 +5,7 @@ public import AugmentedDescartes.Rows
 /-!
 # Lorentz
 
-The matrix identity in Lorentz form, the inverses, the determinant (ARCH.md §2). Lane `lorentz`.
+The matrix identity in Lorentz form, the inverses, the determinant (PROOF.md §2).
 -/
 
 @[expose] public section
@@ -187,7 +187,7 @@ theorem lor_augmented_identity_of_gram {n : ℕ} (hn : 0 < n) (W : Matrix (Fin (
     _ = augmentedTarget n := by rw [h3, Matrix.mul_smul, Matrix.mul_one, lor_augmentedTarget_eq]
 
 /-- A solution is invertible, with the explicit two-sided inverse `(G/2) Wᵀ Qₙ`. -/
-theorem lor_inv_of_identity {n : ℕ} (hn : 0 < n) (W : Matrix (Fin (n + 2)) (Fin 2 ⊕ Fin n) ℝ)
+theorem lor_inv_of_identity {n : ℕ} (_hn : 0 < n) (W : Matrix (Fin (n + 2)) (Fin 2 ⊕ Fin n) ℝ)
     (hW : Wᵀ * descartesQ n * W = augmentedTarget n) :
     (((1 / 2 : ℝ) • lorentzG n) * Wᵀ * descartesQ n) * W = 1 ∧
       W * (((1 / 2 : ℝ) • lorentzG n) * Wᵀ * descartesQ n) = 1 := by
@@ -272,7 +272,7 @@ theorem lor_descartesQ_eq_replicate (n : ℕ) :
   ext i j
   simp [descartesQ, Matrix.mul_apply, replicateCol_apply, replicateRow_apply, sub_eq_add_neg]
 
-/-- `det Qₙ = −2/n` (GLMWY III, Lemma 6.4). -/
+/-- `det Qₙ = −2/n` (GLMWY III, (6.4) in the proof of Lemma 6.4). -/
 theorem det_descartesQ_internal (n : ℕ) (hn : 0 < n) : (descartesQ n).det = -2 / n := by
   have hn' : (n : ℝ) ≠ 0 := by positivity
   rw [lor_descartesQ_eq_replicate, det_one_add_replicateCol_mul_replicateRow]

@@ -40,13 +40,16 @@ directly in Euclidean coordinates.
    `⟨b₀ − b, b₀ − b⟩ = −2⟨b₀, b⟩` and `R (b₀ − b) *ᵥ b₀ = b`. Given null `b ≠ 0` and the base matrix `W₀`: with
    `y := V₀ *ᵥ b`, `b = W₀ *ᵥ y` and `⟨W₀ *ᵥ eⱼ, b⟩ = (T y) j`, so `⟨b₀, b⟩ = −4 y₀` and `⟨b̄₀, b⟩ = −4 y₁`; if `y₀ ≠ 0`
    reflect `W₀`, else `y₁ ≠ 0` (else `⟨b, b⟩ = 2 Σ_{k≥2} yₖ² = 0` forces `y = 0`, `b = 0`) and reflect `W₀ σ`, `σ` the
-   swap of the two hyperbolic columns (`σᵀ T σ = T`). An isometry `U` of `Qₙ` keeps the identity. Decode; the curvatures
-   are the second column. `exists_pairwiseTangent` at `n ≥ 2` from `b = (1, …, 1, 2n/(n−1), 2n(n+1)/(n−1)²)` (null:
-   `(n+1)⁴ − (n−1)⁴ = 8n³ + 8n`); at `n = 1` the intervals with centres `1, 3, 2` and radii `1, 1, −2`.
+   swap of the two hyperbolic columns (`σᵀ T σ = T`; `W₀ σ` is the configuration's inversion in the unit sphere). An
+   isometry `U` of `Qₙ` keeps the identity. Decode; the curvatures are the second column. `exists_pairwiseTangent` at
+   `n ≥ 2` from `b = (1, …, 1, 2n/(n−1), 2n(n+1)/(n−1)²)` (null: `(n+1)⁴ − (n−1)⁴ = 8n³ + 8n`); at `n = 1` from
+   `b = (1, 1, −½)`.
 8. **The converse of the curvature–centre theorem** (`Completion.lean`). `M = [b | V]`, `Mᵀ Qₙ M = diag(0, 2•1)`, `b ≠ 0`:
    `P := 1 − (1/2) • V * Vᵀ * Qₙ` satisfies `Vᵀ Qₙ (P u) = 0`; `⟨P u, b⟩ = ⟨u, b⟩ = (Qₙ b) ⬝ᵥ u`, so some
    `z := P *ᵥ Pi.single ℓ 1` has `⟨z, b⟩ ≠ 0` (`Qₙ b ≠ 0` since `Qₙ` is invertible); `b̄ := (−4/⟨z, b⟩) • (z − (⟨z, z⟩/(2⟨z,
    b⟩)) • b)` is null, `Qₙ`-orthogonal to `V`'s columns, pairs to `−4` with `b`; `W := [b̄ | b | V]` satisfies the identity;
    decode. Uniqueness: two completions `b̄, b̄'` give `d = b̄' − b̄` with `⟨d, b⟩ = 0`, `⟨d, V⟩ = 0`; in the basis of `W`'s
-   columns `d = α b + β b̄`, `β = 0`, and `⟨b̄', b⟩ = −4` forces `α = 0`. The counterexample at `n = 2`: columns
-   `0, e₀ − e₁, e₂ − e₃`; any family's augmented matrix would have `(inl 0, inl 1)` entry `⟨b̄, 0⟩ = 0 ≠ −4`.
+   columns `d = α b + β b̄`, `⟨d, b⟩ = −4β` forces `β = 0`, and `⟨b̄', b̄'⟩ = −8α = 0` forces `α = 0`. The matrix at
+   `n = 2` with columns `0, e₀ − e₁, e₂ − e₃` solves the equation (it is the curvature–centre matrix of four oriented
+   lines with normals `±e₀, ±e₁`) and no valid, pairwise tangent family has it: such a family's augmented matrix would
+   satisfy the identity with `(inl 0, inl 1)` entry `⟨b̄, 0⟩ = 0 ≠ −4`.

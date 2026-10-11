@@ -5,7 +5,7 @@ public import AugmentedDescartes.Converse
 /-!
 # Completion
 
-The converse of the curvature–centre theorem (ARCH.md §8). Lane `completion`.
+The converse of the curvature–centre theorem (PROOF.md §8).
 -/
 
 @[expose] public section
@@ -14,7 +14,7 @@ namespace AugmentedDescartes
 
 open Matrix
 
-/-! ### Sorry-free twins of the `Lorentz` facts this module uses (for the merge) -/
+/-! ### Local forms of the `Lorentz` facts this module uses -/
 
 theorem cmp_descartesQ_transpose (n : ℕ) : (descartesQ n)ᵀ = descartesQ n := by
   ext i j
@@ -250,9 +250,11 @@ theorem cmp_exists_unique_completion {n : ℕ} (hn : 0 < n) (M : Matrix (Fin (n 
   exact (cmp_completion_unique W W' hW hW' (fun i => by rw [h1, W1])
     (fun i k => by rw [h2, Wv])).symm
 
-/-- The converse of LMW Theorem 3.2: every real `M` with `Mᵀ Qₙ M = diag(0, 2 Iₙ)` and a nonzero first
-column is the curvature–centre matrix of exactly one family of valid, pairwise tangent oriented spheres and
-hyperplanes. -/
+/-- The converse of LMW Theorem 3.2 in every dimension, under the hypothesis of a nonzero first column
+(GLMWY I, Theorem 3.1 and its Remark, state and prove it at `n = 2` with this hypothesis; LMW's printed
+converse, "any real solution `M`", omits it): every real `M` with `Mᵀ Qₙ M = diag(0, 2 Iₙ)` and a nonzero
+first column is the curvature–centre matrix of exactly one family of valid, pairwise tangent oriented spheres
+and hyperplanes (tangency in the signed-distance sense). -/
 theorem curvature_center_converse_internal {n : ℕ} (hn : 0 < n) (M : Matrix (Fin (n + 2)) (Fin 1 ⊕ Fin n) ℝ)
     (hM : Mᵀ * descartesQ n * M = curvatureCenterTarget n) (hb : ∃ i, M i (Sum.inl 0) ≠ 0) :
     ∃! s : Fin (n + 2) → OrientedSphere n, (∀ i, OrientedSphere.IsValid (s i)) ∧
@@ -281,8 +283,10 @@ theorem curvature_center_converse_internal {n : ℕ} (hn : 0 < n) (M : Matrix (F
     have := congrFun (congrFun hs' i) (Sum.inr k)
     simpa [curvatureCenterMatrixOf, augmentedMatrixOf] using this
 
-/-- The hypothesis of `curvature_center_converse` is needed: at `n = 2` the matrix with columns
-`0, e₀ − e₁, e₂ − e₃` solves the equation and is the curvature–centre matrix of no family. -/
+/-- The hypothesis of `curvature_center_converse` is needed (GLMWY I, the Remark after Theorem 3.1): at
+`n = 2` the matrix with columns `0, e₀ − e₁, e₂ − e₃` solves the equation and is the curvature–centre matrix
+of no valid, pairwise tangent family (it is the matrix of four oriented lines with normals `±e₀, ±e₁`, which
+are not pairwise tangent). -/
 theorem curvature_center_converse_needs_nonzero_internal :
     ∃ M : Matrix (Fin (2 + 2)) (Fin 1 ⊕ Fin 2) ℝ, Mᵀ * descartesQ 2 * M = curvatureCenterTarget 2 ∧
       (∀ i, M i (Sum.inl 0) = 0) ∧

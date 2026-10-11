@@ -3,8 +3,9 @@ module
 public import Mathlib
 
 /-!
-# The augmented Descartes theorem in every dimension: the matrix identity, its converse, the converses
-of the Soddy–Gosset and curvature–centre theorems, and Soddy's two spheres, by the Lorentz form
+# The augmented Descartes theorem in every dimension: the matrix identity, its converse, the existence half
+of the converse of Soddy–Gosset, the converse of the curvature–centre theorem for a nonzero first column, and
+Soddy's two spheres, by the Lorentz form
 
 J. C. Lagarias, C. L. Mallows, A. R. Wilks, *Beyond the Descartes circle theorem*, Amer. Math. Monthly 109
 (2002) 338–361 (arXiv:math/0101066), Section 3. An oriented sphere in `ℝⁿ` with centre `x` and signed
@@ -23,9 +24,12 @@ Tangency is by signed distances, LMW's oriented tangency pair by pair: two spher
 (external tangency for two positive radii, internal when one radius is negative); a sphere and a hyperplane
 `⟪h, x⟫ − δ = −r` (the hyperplane's interior is the side `⟪h, y⟫ > δ`, into which `h` points); two
 hyperplanes `h' = −h` (tangent at infinity). The disjoint-interiors property of an oriented Descartes
-configuration is not formalized: the converses deliver tangency in this sense. Everything holds for `n ≥ 1`;
-LMW's Section 3 assumes `n ≥ 2`, and their Section 8, (8.4), states the identity on the line with the same
-target under its own convention for the infinite interval.
+configuration is not formalized: the converses deliver tangency in this sense. The identity, its converse and
+the corollaries hold for `n ≥ 1` (the Apollonian statements need `n ≥ 2`, and the matrix of
+`curvature_center_converse_needs_nonzero` lives at `n = 2`); LMW's Section 3 assumes `n ≥ 2`, and their Section 8,
+(8.4), states the identity on the line with the same target under its own convention for the infinite interval,
+while the hyperplanes of `n = 1` here (oriented points, tangent when their normals are opposite) lie outside
+that section's text.
 
 The development runs LMW's Section 4 argument (Lemmas 4.3–4.4, (4.9)–(4.10)) directly in Euclidean
 coordinates: with `G = [[0, −½, 0], [−½, 0, 0], [0, 0, Iₙ]]` (the inverse of half the target, not the
@@ -37,15 +41,18 @@ nonzero `b` with `(Σ bᵢ)² = n Σ bᵢ²` is the curvature vector of a config
 proof of this result; a proof appears in [16]", [16] being Graham–Lagarias–Mallows–Wilks–Yan, *Apollonian
 circle packings: geometry and group theory III*, whose arXiv versions 1–2 prove both halves as their Theorem
 2.2 from the same base configuration and the transitivity of the Lorentz group, a section the published
-version omits), by one `Qₙ`-reflection from that configuration (GLMWY III, Theorem 6.1); the converse of
+version omits), by one `Qₙ`-reflection from that configuration or from its inversion in the unit sphere (the
+configuration in the proof of GLMWY III's Theorem 6.1); the converse of
 Theorem 3.2 in every dimension under the hypothesis of a nonzero first column (GLMWY I, Theorem 3.1 and its
-Remark, prove it at `n = 2` with that hypothesis; LMW's printed converse and GLMWY III's Theorem 2.3 omit it,
-and the matrix at `n = 2` with columns `0, e₀ − e₁, e₂ − e₃`, GLMWY I's configuration (3.15) with its first
-column zeroed, solves the equation and is no configuration); Soddy's two spheres in every dimension `n ≥ 2`, in the signed sense (LMW
+Remark, prove it at `n = 2` with that hypothesis; LMW's printed converse and GLMWY III's arXiv v1–v2 Theorem
+2.3 omit it, and the matrix at `n = 2` with columns `0, e₀ − e₁, e₂ − e₃`, GLMWY I's configuration (3.15) with
+its first column zeroed, solves the equation and is the curvature–centre matrix of no valid, pairwise tangent
+family); Soddy's two spheres in every dimension `n ≥ 2`, in the signed sense (LMW
 footnote 3; GLMWY III §4.1): the oriented spheres and hyperplanes tangent to `n + 1` members of a
 configuration are exactly the missing one and its Apollonian reflection, with `b + b' = (2/(n − 1)) Σ bᵢ`,
 the Apollonian generators of GLMWY III (4.1) preserving `Qₙ`; the existence of a configuration in every
-dimension (GLMWY III, Theorem 6.1); `det Qₙ = −2/n` (GLMWY III, (6.4) in the proof of Lemma 6.4); and the three statements in
+dimension (the configuration in the proof of GLMWY III's Theorem 6.1); `det Qₙ = −2/n` (GLMWY III, (6.4) in the
+proof of Lemma 6.4); and the three statements in
 Mathlib's vocabulary (`EuclideanGeometry.Sphere.IsExtTangent`, `IsIntTangent`). The congruence half of
 Theorem 3.1's converse is not formalized.
 
@@ -82,9 +89,9 @@ oriented sphere with centre `x` and signed radius `r`, where `b = 1/r` and `b̄ 
 noncomputable def sphereRow {n : ℕ} (x : EuclideanSpace ℝ (Fin n)) (r : ℝ) : Fin 2 ⊕ Fin n → ℝ :=
   Sum.elim ![‖x‖ ^ 2 / r - r, 1 / r] (fun k => x k / r)
 
-/-- LMW (3.9): the coordinates `(2δ, 0, h)` of the oriented hyperplane `⟪h, y⟫ = δ` with unit normal `h`,
-whose interior is the side `⟪h, y⟫ > δ` into which `h` points (the inversion of that half-space in the unit
-sphere is a ball or the exterior of a ball of signed curvature `2δ`). -/
+/-- LMW (3.9): the coordinates `(b̄, 0, h)` of the oriented hyperplane `⟪h, y⟫ = δ` with unit normal `h`, where
+`b̄ = 2δ` is the curvature of its inversion in the unit sphere (GLMWY I, p. 8: twice the distance from the
+origin), the interior being the side `⟪h, y⟫ > δ` into which `h` points (GLMWY III, p. 7). -/
 noncomputable def planeRow {n : ℕ} (h : EuclideanSpace ℝ (Fin n)) (δ : ℝ) : Fin 2 ⊕ Fin n → ℝ :=
   Sum.elim ![2 * δ, 0] (fun k => h k)
 
@@ -125,8 +132,9 @@ noncomputable def OrientedSphere.row {n : ℕ} (s : OrientedSphere n) : Fin 2 �
 noncomputable def OrientedSphere.curvature {n : ℕ} (s : OrientedSphere n) : ℝ :=
   Sum.elim (fun p => 1 / p.2) (fun _ => 0) s
 
-/-- LMW's oriented tangency, by cases: two spheres `dist (x, y)² = (r + s)²`; a sphere `(x, r)` and a
-hyperplane `(h, δ)`: `⟪h, x⟫ − δ = −r`; two hyperplanes: opposite unit normals. -/
+/-- Oriented tangency pair by pair (the pairwise form of LMW's oriented Descartes configurations; GLMWY III,
+arXiv v2, Definition 2.1): two spheres `dist (x, y)² = (r + s)²`; a sphere `(x, r)` and a hyperplane `(h, δ)`:
+`⟪h, x⟫ − δ = −r`; two hyperplanes: opposite unit normals. -/
 noncomputable def OrientedSphere.Tangent {n : ℕ} (s t : OrientedSphere n) : Prop :=
   Sum.elim
     (fun p => Sum.elim (fun q => dist p.1 q.1 ^ 2 = (p.2 + q.2) ^ 2)
@@ -311,11 +319,11 @@ theorem sphere_augmented_descartes {n : ℕ} (hn : 0 < n)
     (augmentedMatrix (fun i => (s i).center) (fun i => (s i).radius))ᵀ * descartesQ n *
       augmentedMatrix (fun i => (s i).center) (fun i => (s i).radius) = augmentedTarget n := sorry
 
-/-! ## Beyond LMW: the two converses they leave unproved -/
+/-! ## A configuration in every dimension, and the two converses LMW refer to [16] -/
 
 /-- Existence of a configuration in every dimension: two parallel hyperplanes at distance `2` and `n`
-unit spheres centred at `√2 eᵢ` (the configuration of GLMWY III, Theorem 6.1, stated there for `n ≥ 2`; at
-`n = 1` the hyperplanes are oriented points). -/
+unit spheres centred at `√2 eᵢ` (the configuration in the proof of GLMWY III's Theorem 6.1, given there for
+`n ≥ 2`; at `n = 1` the hyperplanes are oriented points). -/
 theorem exists_configuration (n : ℕ) (hn : 0 < n) :
     ∃ s : Fin (n + 2) → OrientedSphere n, (∀ i, OrientedSphere.IsValid (s i)) ∧
       ∀ i j, i ≠ j → OrientedSphere.Tangent (s i) (s j) := sorry
@@ -356,7 +364,8 @@ theorem curvature_center_converse {n : ℕ} (hn : 0 < n) (M : Matrix (Fin (n + 2
 
 /-- The hypothesis of `curvature_center_converse` is needed (GLMWY I, the Remark after Theorem 3.1): at
 `n = 2` the matrix with columns `0, e₀ − e₁, e₂ − e₃` solves the equation and is the curvature–centre matrix
-of no family. -/
+of no valid, pairwise tangent family (it is the matrix of four oriented lines with normals `±e₀, ±e₁`, which
+are not pairwise tangent). -/
 theorem curvature_center_converse_needs_nonzero :
     ∃ M : Matrix (Fin (2 + 2)) (Fin 1 ⊕ Fin 2) ℝ, Mᵀ * descartesQ 2 * M = curvatureCenterTarget 2 ∧
       (∀ i, M i (Sum.inl 0) = 0) ∧
