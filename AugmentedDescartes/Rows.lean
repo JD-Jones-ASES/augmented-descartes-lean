@@ -248,4 +248,10 @@ theorem rows_lorentz_eq_dotProduct_mulVec {n : ℕ} (u v : Fin 2 ⊕ Fin n → �
   simp [lorentz, lorentzG, dotProduct, mulVec, Fintype.sum_sum_type, Fin.sum_univ_two, Matrix.one_apply]
   ring
 
+/-- The Gram matrix of the rows of `W` under the Lorentz form: `(W G Wᵀ) i j = lorentz (W i) (W j)`. -/
+theorem rows_mul_lorentzG_mul_transpose_apply {n m : ℕ} (W : Matrix (Fin m) (Fin 2 ⊕ Fin n) ℝ) (i j : Fin m) :
+    (W * lorentzG n * Wᵀ) i j = lorentz (W i) (W j) := by
+  rw [rows_lorentz_eq_dotProduct_mulVec, Matrix.mul_assoc]
+  simp [Matrix.mul_apply, dotProduct, mulVec]
+
 end AugmentedDescartes
