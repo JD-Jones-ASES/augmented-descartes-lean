@@ -216,8 +216,8 @@ theorem main_complex_descartes (x : Fin (2 + 2) → EuclideanSpace ℝ (Fin 2)) 
   have e00 := main_center_entry (by norm_num) x r h 0 0
   have e11 := main_center_entry (by norm_num) x r h 1 1
   have e01 := main_center_entry (by norm_num) x r h 0 1
-  rw [if_pos rfl] at e00 e11
-  rw [if_neg (by decide)] at e01
+  rw [ite_eq_left rfl] at e00 e11
+  rw [ite_eq_right (by decide)] at e01
   simp only [Nat.cast_ofNat] at e00 e11 e01
   simp_rw [main_complex_term x r]
   exact main_complex_aux (fun i => x i 0 / r i) (fun i => x i 1 / r i) e00 e11 e01
