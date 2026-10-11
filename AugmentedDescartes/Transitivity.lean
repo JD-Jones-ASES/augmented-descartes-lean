@@ -254,4 +254,30 @@ theorem exists_pairwiseTangent_internal (n : ℕ) (hn : 0 < n) :
         ring)
     exact ⟨x, r, hxr⟩
 
+/-- The reflection negates its own vector. -/
+theorem tr_qReflection_mulVec_self {n : ℕ} (v : Fin (n + 2) → ℝ) (hv : v ⬝ᵥ (descartesQ n *ᵥ v) ≠ 0) :
+    qReflection v *ᵥ v = -v := by
+  unfold qReflection
+  rw [sub_mulVec, one_mulVec, smul_mulVec, vecMulVec_mulVec, op_smul_eq_smul, smul_smul,
+    dotProduct_comm (descartesQ n *ᵥ v) v, div_mul_cancel₀ _ hv, two_smul]
+  abel
+
+/-- The `Qₙ`-isometries act simply transitively on the solutions of the identity: any two solutions differ
+by exactly one isometry on the left (with `U = W' (G/2) Wᵀ Qₙ`). -/
+theorem tr_existsUnique_isometry {n : ℕ} (hn : 0 < n) (W W' : Matrix (Fin (n + 2)) (Fin 2 ⊕ Fin n) ℝ)
+    (hW : Wᵀ * descartesQ n * W = augmentedTarget n) (hW' : W'ᵀ * descartesQ n * W' = augmentedTarget n) :
+    ∃! U : Matrix (Fin (n + 2)) (Fin (n + 2)) ℝ, Uᵀ * descartesQ n * U = descartesQ n ∧ U * W = W' := by
+  obtain ⟨hVW, hWV⟩ := lor_inv_of_identity hn W hW
+  generalize ((1 / 2 : ℝ) • lorentzG n) * Wᵀ * descartesQ n = V at hVW hWV
+  refine ⟨W' * V, ⟨?_, ?_⟩, ?_⟩
+  · calc (W' * V)ᵀ * descartesQ n * (W' * V) = Vᵀ * (W'ᵀ * descartesQ n * W') * V := by
+          rw [transpose_mul]; simp only [Matrix.mul_assoc]
+      _ = Vᵀ * (Wᵀ * descartesQ n * W) * V := by rw [hW', hW]
+      _ = (W * V)ᵀ * descartesQ n * (W * V) := by
+          rw [transpose_mul W V]; simp only [Matrix.mul_assoc]
+      _ = descartesQ n := by rw [hWV, transpose_one, Matrix.one_mul, Matrix.mul_one]
+  · rw [Matrix.mul_assoc, hVW, Matrix.mul_one]
+  · rintro U ⟨-, hU⟩
+    rw [← hU, Matrix.mul_assoc, hWV, Matrix.mul_one]
+
 end AugmentedDescartes
