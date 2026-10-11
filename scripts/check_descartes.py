@@ -421,5 +421,6 @@ if __name__ == "__main__":
     check_converse_thm32()
     check_sphere_bridge()
     check_control()
-    print(f"VERDICT: {'PASS' if not FAILS else 'FAIL'} ({len(FAILS)} failures)")
+    print(f"{len(FAILS)} failures")
+    print(f"VERDICT: {'PASS' if not FAILS else 'FAIL'}")
     sys.exit(0 if not FAILS else 1)
