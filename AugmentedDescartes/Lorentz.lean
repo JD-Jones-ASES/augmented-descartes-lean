@@ -293,4 +293,58 @@ theorem soddy_gosset_iff_isotropic_internal {n : ℕ} (hn : 0 < n) (b : Fin (n +
   · intro h
     rw [sub_eq_zero.mp h, ← mul_assoc, mul_inv_cancel₀ hn', one_mul, sq]
 
+/-! ## Extras for the neighbouring modules (Apollonian, Transitivity, Completion) -/
+
+/-- `(2I − J) d = 2 d − (Σ d) 𝟙`. -/
+theorem lor_twoIminusJ_mulVec (n : ℕ) (d : Fin (n + 2) → ℝ) :
+    ((2 • (1 : Matrix (Fin (n + 2)) (Fin (n + 2)) ℝ) - Matrix.of (fun _ _ => (1 : ℝ)) :
+      Matrix (Fin (n + 2)) (Fin (n + 2)) ℝ) *ᵥ d) = fun i => 2 * d i - ∑ j, d j := by
+  ext i
+  rw [sub_mulVec, smul_mulVec, one_mulVec]
+  simp [mulVec, dotProduct]
+
+/-- The Lorentz pairing of two combinations of the rows of a solution:
+`⟨c W, d W⟩ = 2 Σ cᵢ dᵢ − (Σ c)(Σ d)`. -/
+theorem lor_lorentz_vecMul {n : ℕ} (hn : 0 < n) (W : Matrix (Fin (n + 2)) (Fin 2 ⊕ Fin n) ℝ)
+    (hW : Wᵀ * descartesQ n * W = augmentedTarget n) (c d : Fin (n + 2) → ℝ) :
+    lorentz (c ᵥ* W) (d ᵥ* W) = 2 * ∑ i, c i * d i - (∑ i, c i) * ∑ i, d i := by
+  have hG := lor_gram_of_identity hn W hW
+  rw [lor_lorentz_eq_dotProduct, ← mulVec_transpose W d, mulVec_mulVec, ← dotProduct_mulVec,
+    mulVec_mulVec, ← Matrix.mul_assoc, hG, lor_twoIminusJ_mulVec]
+  simp only [dotProduct, mul_sub, Finset.sum_sub_distrib, ← Finset.sum_mul]
+  congr 1
+  rw [Finset.mul_sum]
+  exact Finset.sum_congr rfl fun i _ => by ring
+
+/-- A combination of the rows paired with row `j`: `⟨c W, W j⟩ = 2 cⱼ − Σ c`. -/
+theorem lor_lorentz_vecMul_row {n : ℕ} (hn : 0 < n) (W : Matrix (Fin (n + 2)) (Fin 2 ⊕ Fin n) ℝ)
+    (hW : Wᵀ * descartesQ n * W = augmentedTarget n) (c : Fin (n + 2) → ℝ) (j : Fin (n + 2)) :
+    lorentz (c ᵥ* W) (W j) = 2 * c j - ∑ i, c i := by
+  have h := lor_lorentz_vecMul hn W hW c (Pi.single j 1)
+  rw [single_one_vecMul] at h
+  rw [show W j = W.row j from rfl, h]
+  simp [Pi.single_apply]
+
+/-- Every vector is a combination of the rows of a solution, with coefficients `w V`,
+`V = (G/2) Wᵀ Qₙ`. -/
+theorem lor_eq_vecMul {n : ℕ} (hn : 0 < n) (W : Matrix (Fin (n + 2)) (Fin 2 ⊕ Fin n) ℝ)
+    (hW : Wᵀ * descartesQ n * W = augmentedTarget n) (w : Fin 2 ⊕ Fin n → ℝ) :
+    (w ᵥ* (((1 / 2 : ℝ) • lorentzG n) * Wᵀ * descartesQ n)) ᵥ* W = w := by
+  rw [vecMul_vecMul, (lor_inv_of_identity hn W hW).1, vecMul_one]
+
+/-- The rows of a solution are linearly independent. -/
+theorem lor_vecMul_eq_zero {n : ℕ} (hn : 0 < n) (W : Matrix (Fin (n + 2)) (Fin 2 ⊕ Fin n) ℝ)
+    (hW : Wᵀ * descartesQ n * W = augmentedTarget n) (c : Fin (n + 2) → ℝ) (hc : c ᵥ* W = 0) :
+    c = 0 := by
+  have h := congrArg (fun u => u ᵥ* (((1 / 2 : ℝ) • lorentzG n) * Wᵀ * descartesQ n)) hc
+  simp only [vecMul_vecMul, (lor_inv_of_identity hn W hW).2, vecMul_one, zero_vecMul] at h
+  exact h
+
+/-- The rows of a solution determine the coefficients: `c W = d W → c = d`. -/
+theorem lor_vecMul_injective {n : ℕ} (hn : 0 < n) (W : Matrix (Fin (n + 2)) (Fin 2 ⊕ Fin n) ℝ)
+    (hW : Wᵀ * descartesQ n * W = augmentedTarget n) (c d : Fin (n + 2) → ℝ)
+    (h : c ᵥ* W = d ᵥ* W) : c = d := by
+  have := lor_vecMul_eq_zero hn W hW (c - d) (by rw [sub_vecMul, h, sub_self])
+  exact sub_eq_zero.mp this
+
 end AugmentedDescartes
