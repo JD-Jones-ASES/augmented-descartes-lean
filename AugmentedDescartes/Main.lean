@@ -235,4 +235,77 @@ theorem main_complex_descartes_mixed (x : Fin (2 + 2) → EuclideanSpace ℝ (Fi
   simp_rw [hb]
   exact main_complex_mixed_aux (fun i => 1 / r i) (fun i => x i 0 / r i) (fun i => x i 1 / r i) e0 e1
 
+/-! ## Extras for `Corollaries`: Mathlib's spheres -/
+
+theorem main_pairwiseTangent_of_isExtTangent {n : ℕ}
+    (s : Fin (n + 2) → EuclideanGeometry.Sphere (EuclideanSpace ℝ (Fin n)))
+    (hr : ∀ i, 0 < (s i).radius)
+    (ht : ∀ i j, i ≠ j → EuclideanGeometry.Sphere.IsExtTangent (s i) (s j)) :
+    PairwiseTangent (fun i => (s i).center) (fun i => (s i).radius) :=
+  ⟨fun i => (hr i).ne', fun i j hij => by rw [(ht i j hij).dist_center]⟩
+
+theorem main_pairwiseTangent_enclosing {n : ℕ}
+    (s : Fin (n + 2) → EuclideanGeometry.Sphere (EuclideanSpace ℝ (Fin n))) (e : Fin (n + 2))
+    (hr : ∀ i, 0 < (s i).radius)
+    (hint : ∀ j, j ≠ e → EuclideanGeometry.Sphere.IsIntTangent (s j) (s e))
+    (hext : ∀ i j, i ≠ e → j ≠ e → i ≠ j → EuclideanGeometry.Sphere.IsExtTangent (s i) (s j)) :
+    PairwiseTangent (fun i => (s i).center)
+      (fun i => if i = e then -(s i).radius else (s i).radius) := by
+  refine ⟨fun i => ?_, fun i j hij => ?_⟩
+  · have := (hr i).ne'
+    dsimp only
+    split_ifs
+    · exact neg_ne_zero.2 this
+    · exact this
+  · by_cases hi : i = e
+    · subst hi
+      have hj : j ≠ i := fun h => hij h.symm
+      simp only [hj, ↓reduceIte]
+      rw [dist_comm, (hint j hj).dist_center]
+      ring
+    · by_cases hj : j = e
+      · subst hj
+        simp only [hi, ↓reduceIte]
+        rw [(hint i hi).dist_center]
+        ring
+      · simp only [hi, hj, ↓reduceIte]
+        rw [(hext i j hi hj hij).dist_center]
+
+/-- Soddy–Gosset for Mathlib's spheres, pairwise externally tangent, for `Corollaries`. -/
+theorem main_sphere_soddy_gosset {n : ℕ} (hn : 0 < n)
+    (s : Fin (n + 2) → EuclideanGeometry.Sphere (EuclideanSpace ℝ (Fin n)))
+    (hr : ∀ i, 0 < (s i).radius)
+    (ht : ∀ i j, i ≠ j → EuclideanGeometry.Sphere.IsExtTangent (s i) (s j)) :
+    (∑ i, 1 / (s i).radius) ^ 2 = n * ∑ i, (1 / (s i).radius) ^ 2 :=
+  soddy_gosset_internal hn _ _ (main_pairwiseTangent_of_isExtTangent s hr ht)
+
+/-- Soddy–Gosset with one enclosing sphere, for `Corollaries`. -/
+theorem main_sphere_soddy_gosset_enclosing {n : ℕ} (hn : 0 < n)
+    (s : Fin (n + 2) → EuclideanGeometry.Sphere (EuclideanSpace ℝ (Fin n))) (e : Fin (n + 2))
+    (hr : ∀ i, 0 < (s i).radius)
+    (hint : ∀ j, j ≠ e → EuclideanGeometry.Sphere.IsIntTangent (s j) (s e))
+    (hext : ∀ i j, i ≠ e → j ≠ e → i ≠ j → EuclideanGeometry.Sphere.IsExtTangent (s i) (s j)) :
+    (∑ i, (if i = e then -1 else 1) / (s i).radius) ^ 2 =
+      n * ∑ i, ((if i = e then -1 else 1) / (s i).radius) ^ 2 := by
+  have h := soddy_gosset_internal hn _ _ (main_pairwiseTangent_enclosing s e hr hint hext)
+  have hf : (fun i => 1 / (if i = e then -(s i).radius else (s i).radius)) =
+      fun i => (if i = e then -1 else 1) / (s i).radius := by
+    funext i
+    split_ifs
+    · rw [one_div_neg_eq_neg_one_div, neg_div]
+    · rfl
+  have h1 : ∀ i, 1 / (if i = e then -(s i).radius else (s i).radius) =
+      (if i = e then -1 else 1) / (s i).radius := fun i => congrFun hf i
+  simp only [h1] at h
+  exact h
+
+/-- The augmented identity for Mathlib's spheres, pairwise externally tangent, for `Corollaries`. -/
+theorem main_sphere_augmented_descartes {n : ℕ} (hn : 0 < n)
+    (s : Fin (n + 2) → EuclideanGeometry.Sphere (EuclideanSpace ℝ (Fin n)))
+    (hr : ∀ i, 0 < (s i).radius)
+    (ht : ∀ i j, i ≠ j → EuclideanGeometry.Sphere.IsExtTangent (s i) (s j)) :
+    (augmentedMatrix (fun i => (s i).center) (fun i => (s i).radius))ᵀ * descartesQ n *
+      augmentedMatrix (fun i => (s i).center) (fun i => (s i).radius) = augmentedTarget n :=
+  augmented_descartes_internal hn _ _ (main_pairwiseTangent_of_isExtTangent s hr ht)
+
 end AugmentedDescartes
