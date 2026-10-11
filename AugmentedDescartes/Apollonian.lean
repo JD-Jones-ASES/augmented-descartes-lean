@@ -58,7 +58,7 @@ theorem apo_apollonianGen_apply' {n : ℕ} (hn : 2 ≤ n) (k m i : Fin (n + 2)) 
 theorem apo_colsum {n : ℕ} (hn : 2 ≤ n) (k i : Fin (n + 2)) :
     ∑ m, apollonianGen n k m i = 1 + apo_u n k i := by
   simp only [apo_apollonianGen_apply' hn, Finset.sum_add_distrib, Finset.sum_ite_eq', Finset.mem_univ,
-    if_true]
+    ite_true]
 
 /-- The column dot products of `Sₖ`. -/
 theorem apo_prodsum {n : ℕ} (hn : 2 ≤ n) (k i j : Fin (n + 2)) :
@@ -73,7 +73,7 @@ theorem apo_prodsum {n : ℕ} (hn : 2 ≤ n) (k i j : Fin (n + 2)) :
     intro m
     rw [apo_apollonianGen_apply' hn, apo_apollonianGen_apply' hn]
     split_ifs <;> subst_vars <;> first | ring1 | simp_all
-  simp only [h, Finset.sum_add_distrib, Finset.sum_ite_eq', Finset.mem_univ, if_true]
+  simp only [h, Finset.sum_add_distrib, Finset.sum_ite_eq', Finset.mem_univ, ite_true]
 
 /-- The entries of `Aᵀ Q B` as a dot product of columns. -/
 theorem apo_transpose_mul_mul_apply {ι κ ν : Type*} [Fintype ι] (A : Matrix ι κ ℝ) (Q : Matrix ι ι ℝ)
@@ -99,7 +99,7 @@ theorem apollonianGen_mem_aut_internal {n : ℕ} (hn : 2 ≤ n) (k : Fin (n + 2)
   have hne := apo_sub_one_ne_zero hn
   have hnR : (n : ℝ) ≠ 0 := Nat.cast_ne_zero.mpr (by omega)
   unfold apo_u
-  split_ifs <;> subst_vars <;> first | ring1 | (field_simp; ring1) | simp_all | field_simp
+  split_ifs <;> subst_vars <;> first | ring1 | (field_simp; ring1)
 
 /-- Replacing sphere `k` of a configuration by its Apollonian reflection gives a configuration. -/
 theorem apollonian_reflection_internal {n : ℕ} (hn : 2 ≤ n) (W : Matrix (Fin (n + 2)) (Fin 2 ⊕ Fin n) ℝ)
@@ -114,11 +114,11 @@ theorem apollonianGen_mul_apply_internal {n : ℕ} (hn : 2 ≤ n) (W : Matrix (F
     (apollonianGen n k * W) k j = (2 / ((n : ℝ) - 1)) * ∑ i ∈ Finset.univ.erase k, W i j - W k j := by
   rw [Matrix.mul_apply, ← Finset.add_sum_erase _ _ (Finset.mem_univ k)]
   have hk : apollonianGen n k k k = -1 := by
-    rw [apo_apollonianGen_apply, if_pos rfl, if_pos rfl, apo_diag hn]
+    rw [apo_apollonianGen_apply, ite_eq_left rfl, ite_eq_left rfl, apo_diag hn]
   have hrest : ∑ m ∈ Finset.univ.erase k, apollonianGen n k k m * W m j =
       ∑ m ∈ Finset.univ.erase k, 2 / ((n : ℝ) - 1) * W m j :=
     Finset.sum_congr rfl fun m hm => by
-      rw [apo_apollonianGen_apply, if_pos rfl, if_neg (Finset.ne_of_mem_erase hm)]
+      rw [apo_apollonianGen_apply, ite_eq_left rfl, ite_eq_right (Finset.ne_of_mem_erase hm)]
   rw [hk, hrest, ← Finset.mul_sum]
   ring
 
@@ -147,8 +147,8 @@ theorem apo_pair_row {n : ℕ} (W : Matrix (Fin (n + 2)) (Fin 2 ⊕ Fin n) ℝ)
   have h : ∀ i, c i * lorentz (W i) (W j) = 2 * (if i = j then c i else 0) - c i := by
     intro i
     by_cases hij : i = j
-    · subst hij; rw [h1, if_pos rfl]; ring
-    · rw [h2 i j hij, if_neg hij]; ring
+    · subst hij; rw [h1, ite_eq_left rfl]; ring
+    · rw [h2 i j hij, ite_eq_right hij]; ring
   rw [Finset.sum_congr rfl fun i _ => h i, Finset.sum_sub_distrib, ← Finset.mul_sum, Finset.sum_ite_eq']
   simp
 
@@ -187,7 +187,7 @@ theorem two_tangent_rows_internal {n : ℕ} (hn : 2 ≤ n) (W : Matrix (Fin (n +
     rw [Matrix.mul_apply]
     have : ∀ m, apollonianGen n k i m * W m l = if i = m then W m l else 0 := by
       intro m
-      rw [apo_apollonianGen_apply, if_neg hi]
+      rw [apo_apollonianGen_apply, ite_eq_right hi]
       split_ifs <;> ring
     rw [Finset.sum_congr rfl fun m _ => this m, Finset.sum_ite_eq]
     simp
@@ -250,7 +250,7 @@ theorem two_tangent_rows_internal {n : ℕ} (hn : 2 ≤ n) (W : Matrix (Fin (n +
       rw [← apo_mul_row (1 : Matrix (Fin (n + 2)) (Fin (n + 2)) ℝ) W k, Matrix.one_mul]
     rw [hrow1, apo_mul_row] at heq
     have := congrFun (apo_vecMul_inj hn0 W hW _ _ heq) k
-    rw [Matrix.one_apply_eq, apo_apollonianGen_apply, if_pos rfl, if_pos rfl, apo_diag hn] at this
+    rw [Matrix.one_apply_eq, apo_apollonianGen_apply, ite_eq_left rfl, ite_eq_left rfl, apo_diag hn] at this
     norm_num at this
 
 /-- Soddy's two spheres, geometrically: given `n + 1` members of a configuration, exactly two valid
