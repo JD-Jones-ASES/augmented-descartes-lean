@@ -107,6 +107,28 @@ theorem apollonian_reflection_internal {n : ℕ} (hn : 2 ≤ n) (W : Matrix (Fin
     (apollonianGen n k * W)ᵀ * descartesQ n * (apollonianGen n k * W) = augmentedTarget n :=
   lor_isometry_mul _ (apollonianGen_mem_aut_internal hn k) W hW
 
+/-- The Apollonian generators are involutions (GLMWY III, after (4.1)): `Sₖ Sₖ = 1`. -/
+theorem apo_apollonianGen_mul_self {n : ℕ} (hn : 2 ≤ n) (k : Fin (n + 2)) :
+    apollonianGen n k * apollonianGen n k = 1 := by
+  ext i j
+  rw [Matrix.mul_apply, Matrix.one_apply]
+  have h : ∀ m, apollonianGen n k i m * apollonianGen n k m j =
+      (if i = m then apollonianGen n k m j else 0) +
+        (if i = k then apo_u n k m * apollonianGen n k m j else 0) := by
+    intro m
+    rw [apo_apollonianGen_apply' hn k i m]
+    split_ifs <;> ring1
+  rw [Finset.sum_congr rfl fun m _ => h m, Finset.sum_add_distrib, Finset.sum_ite_eq,
+    apo_apollonianGen_apply' hn k i j]
+  simp only [Finset.mem_univ, ite_true]
+  by_cases hi : i = k
+  · subst hi
+    simp only [apo_apollonianGen_apply' hn, ↓reduceIte, mul_add, mul_ite, mul_one,
+      mul_zero, Finset.sum_add_distrib, Finset.sum_ite_eq', Finset.mem_univ]
+    unfold apo_u
+    split_ifs <;> subst_vars <;> first | ring1 | simp_all
+  · simp [hi]
+
 /-- The reflected row is `(2/(n−1)) Σ_{i ≠ k} (row i) − (row k)`; in particular the two curvatures
 satisfy `bₖ + bₖ' = (2/(n−1)) Σ_{i ≠ k} bᵢ` (LMW (2.1) at `n = 2`). -/
 theorem apollonianGen_mul_apply_internal {n : ℕ} (hn : 2 ≤ n) (W : Matrix (Fin (n + 2)) (Fin 2 ⊕ Fin n) ℝ)
