@@ -3,9 +3,9 @@ module
 public import Mathlib
 
 /-!
-# The augmented Descartes theorem in every dimension: the matrix identity, its converse, the existence half
-of the converse of Soddy–Gosset, the converse of the curvature–centre theorem for a nonzero first column, and
-Soddy's two spheres, by the Lorentz form
+# The augmented Descartes theorem in every dimension: the matrix identity, its converse, both halves of the
+converse of Soddy–Gosset, compatible orientations, the converse of the curvature–centre theorem for a nonzero
+first column, and Soddy's two spheres, by the Lorentz form
 
 J. C. Lagarias, C. L. Mallows, A. R. Wilks, *Beyond the Descartes circle theorem*, Amer. Math. Monthly 109
 (2002) 338–361 (arXiv:math/0101066), Section 3. An oriented sphere in `ℝⁿ` with centre `x` and signed
@@ -23,8 +23,14 @@ centre block (Theorem 2.1).
 Tangency is by signed distances, LMW's oriented tangency pair by pair: two spheres `dist (x, y)² = (r + s)²`
 (external tangency for two positive radii, internal when one radius is negative); a sphere and a hyperplane
 `⟪h, x⟫ − δ = −r` (the hyperplane's interior is the side `⟪h, y⟫ > δ`, into which `h` points); two
-hyperplanes `h' = −h` (tangent at infinity). The disjoint-interiors property of an oriented Descartes
-configuration is not formalized: the converses deliver tangency in this sense. The identity, its converse and
+hyperplanes `h' = −h` (tangent at infinity; there is no compactification), and the converses deliver tangency in
+this sense. The compatible orientations of an oriented Descartes configuration (LMW §3: disjoint interiors, with
+the given orientations or with all reversed) are proved separately for every solution: the power polynomial
+`rowPower w y` of a row is negative exactly on the open ball, the open exterior (negative radius) or the open
+half-space into which the normal points, and after multiplication by the total curvature `B = Σ bᵢ`, which is
+nonzero, these sets are pairwise disjoint; at most two rows are hyperplanes and no three boundaries share a
+finite point. For a family of valid, pairwise tangent objects with `B > 0` the open interiors themselves are
+pairwise disjoint (`tangent_family_interiors_disjoint`). The identity, its converse and
 the corollaries hold for `n ≥ 1` (the Apollonian statements need `n ≥ 2`, and the matrix of
 `curvature_center_converse_needs_nonzero` lives at `n = 2`); LMW's Section 3 assumes `n ≥ 2`, and their Section 8,
 (8.4), states the identity on the line with the same target under its own convention for the infinite interval,
@@ -54,7 +60,13 @@ the Apollonian generators of GLMWY III (4.1) preserving `Qₙ`; the existence of
 dimension (the configuration in the proof of GLMWY III's Theorem 6.1); `det Qₙ = −2/n` (GLMWY III, (6.4) in the
 proof of Lemma 6.4); and the three statements in
 Mathlib's vocabulary (`EuclideanGeometry.Sphere.IsExtTangent`, `IsIntTangent`). The congruence half of
-Theorem 3.1's converse is not formalized.
+Theorem 3.1 ("there is a Euclidean motion taking one to the other"; LMW's motions include reflections): two
+valid, pairwise tangent families with the same curvatures, index by index, are carried one to the other by
+exactly one motion `x ↦ x O + t`, `Oᵀ O = 1`, hyperplanes included, with `O = ½ Xᵀ Qₙ X'` and
+`t = −¼ aᵀ Qₙ X'` for augmented matrices `[a | b | X]` and `[a' | b | X']`; LMW state the existence of a motion
+for `n ≥ 2`, and the uniqueness, `n = 1` and the hyperplanes are added here. A motion preserves validity,
+curvature and tangency, so two valid, pairwise tangent families are congruent exactly when their curvature
+vectors agree (`congruent_iff_same_curvature`).
 
 `Solution.lean` proves every statement, kernel-only. The definitions are fully specified here.
 -/
@@ -160,6 +172,35 @@ noncomputable def apollonianGen (n : ℕ) (k : Fin (n + 2)) : Matrix (Fin (n + 2
   1 + (2 / ((n : ℝ) - 1)) • Matrix.vecMulVec (Pi.single k 1) (fun _ => 1) -
     (2 * n / ((n : ℝ) - 1)) • Matrix.vecMulVec (Pi.single k 1) (Pi.single k 1)
 
+/-- The augmented-coordinate matrix of the Euclidean motion `x ↦ x O + t`
+in row-vector convention. Its block form is
+`[[1, 0, 0], [t·t, 1, t], [2 O t, 0, O]]`.
+When `Oᵀ O = I`, this rotates or reflects and translates spheres and hyperplanes. -/
+noncomputable def rigidMotionMatrix {n : ℕ} (O : Matrix (Fin n) (Fin n) ℝ)
+    (t : Fin n → ℝ) : Matrix (Fin 2 ⊕ Fin n) (Fin 2 ⊕ Fin n) ℝ :=
+  Matrix.fromBlocks !![1, 0; t ⬝ᵥ t, 1]
+    (Matrix.of fun i k => ![0, t k] i) (Matrix.of fun k j => ![2 * (O *ᵥ t) k, 0] j) O
+
+/-- The Euclidean point map encoded by `rigidMotionMatrix`. -/
+noncomputable def rigidMotionPoint {n : ℕ} (O : Matrix (Fin n) (Fin n) ℝ)
+    (t : Fin n → ℝ) (x : EuclideanSpace ℝ (Fin n)) : EuclideanSpace ℝ (Fin n) :=
+  WithLp.toLp 2 ((fun k => x k) ᵥ* O + t)
+
+/-- The Euclidean action on oriented objects: the motion moves sphere centres and hyperplane normals, keeps
+signed radii, and shifts hyperplane offsets. -/
+noncomputable def rigidMotionOf {n : ℕ} (O : Matrix (Fin n) (Fin n) ℝ)
+    (t : Fin n → ℝ) : OrientedSphere n → OrientedSphere n :=
+  Sum.elim (fun p => Sum.inl (rigidMotionPoint O t p.1, p.2))
+    (fun p => Sum.inr (rigidMotionPoint O 0 p.1,
+      p.2 + ((fun k => p.1 k) ᵥ* O) ⬝ᵥ t))
+
+/-- The signed power polynomial of an augmented row. Its negative set is the oriented interior: a ball for a
+positive-radius sphere, an exterior for a negative-radius sphere, and the half-space into which the unit normal
+points for a hyperplane. -/
+noncomputable def rowPower {n : ℕ} (w : Fin 2 ⊕ Fin n → ℝ)
+    (y : EuclideanSpace ℝ (Fin n)) : ℝ :=
+  w (Sum.inl 1) * ‖y‖ ^ 2 - 2 * ∑ k, w (Sum.inr k) * y k + w (Sum.inl 0)
+
 /-! ## The encoding: Lorentz pairings of rows -/
 
 /-- A sphere row has Lorentz norm `1`. -/
@@ -226,7 +267,7 @@ theorem augmented_descartes_general {n : ℕ} (hn : 0 < n) (s : Fin (n + 2) → 
 
 /-- The converse of LMW Theorem 3.3 (spheres and hyperplanes): every real solution is the augmented matrix
 of exactly one family of valid, pairwise tangent oriented spheres and hyperplanes (tangency in the
-signed-distance sense; disjoint interiors not asserted). -/
+signed-distance sense; compatible orientations in `augmented_orientation`). -/
 theorem augmented_descartes_converse {n : ℕ} (hn : 0 < n) (W : Matrix (Fin (n + 2)) (Fin 2 ⊕ Fin n) ℝ)
     (hW : Wᵀ * descartesQ n * W = augmentedTarget n) :
     ∃! s : Fin (n + 2) → OrientedSphere n, (∀ i, OrientedSphere.IsValid (s i)) ∧
@@ -336,8 +377,8 @@ theorem exists_pairwiseTangent (n : ℕ) (hn : 0 < n) :
 "We do not know an easy proof of this result; a proof appears in [16]"; GLMWY III's arXiv versions 1–2 prove
 it as their Theorem 2.2 by the same route): every nonzero `b` with
 `(Σ bᵢ)² = n Σ bᵢ²` is the curvature vector of a pairwise tangent family of valid oriented spheres
-(`bᵢ ≠ 0`) and hyperplanes (`bᵢ = 0`), tangency in the signed-distance sense; the congruence half is not
-formalized. -/
+(`bᵢ ≠ 0`) and hyperplanes (`bᵢ = 0`), tangency in the signed-distance sense; the congruence half is
+`same_curvature_congruence`. -/
 theorem converse_soddy_gosset {n : ℕ} (hn : 0 < n) (b : Fin (n + 2) → ℝ) (hb : b ≠ 0)
     (h : (∑ i, b i) ^ 2 = n * ∑ i, b i ^ 2) :
     ∃ s : Fin (n + 2) → OrientedSphere n, (∀ i, OrientedSphere.IsValid (s i)) ∧
@@ -398,8 +439,8 @@ theorem two_tangent_rows {n : ℕ} (hn : 2 ≤ n) (W : Matrix (Fin (n + 2)) (Fin
     (∀ w : Fin 2 ⊕ Fin n → ℝ, (lorentz w w = 1 ∧ ∀ i, i ≠ k → lorentz w (W i) = -1) ↔
       (w = W k ∨ w = (apollonianGen n k * W) k)) ∧ W k ≠ (apollonianGen n k * W) k := sorry
 
-/-- Soddy's two spheres, geometrically (the signed count; LMW's footnote 3 counts the real spheres tangent
-to any `n + 1` mutually tangent spheres with distinct tangencies): given `n + 1` members of a configuration,
+/-- Soddy's two spheres, geometrically (the signed count; LMW's footnote 3: the real circles tangent to each of `n + 1` mutually tangent real circles "with distinct
+tangents" number exactly two): given `n + 1` members of a configuration,
 exactly two valid oriented spheres or hyperplanes are tangent to all of them in the signed sense, the missing
 member and one other, and their curvatures sum to `(2/(n−1)) Σ` of the others' curvatures. -/
 theorem two_tangent_spheres {n : ℕ} (hn : 2 ≤ n) (s : Fin (n + 2) → OrientedSphere n)
@@ -411,5 +452,190 @@ theorem two_tangent_spheres {n : ℕ} (hn : 2 ≤ n) (s : Fin (n + 2) → Orient
         (2 / ((n : ℝ) - 1)) * ∑ i ∈ Finset.univ.erase k, OrientedSphere.curvature (s i) ∧
       ∀ u : OrientedSphere n, OrientedSphere.IsValid u → (∀ i, i ≠ k → OrientedSphere.Tangent u (s i)) →
         u = s k ∨ u = t := sorry
+
+/-! ## The congruence half of Theorem 3.1 -/
+
+/-- The congruence half of the converse of the Soddy–Gosset theorem in matrix form (LMW Theorem 3.1; GLMWY III
+arXiv v1–v2, Theorem 2.2 (ii)): two solutions of the identity with the same curvature column satisfy
+`W₁ * rigidMotionMatrix O t = W₂` for exactly one pair `(O, t)` with `Oᵀ O = 1`, hyperplanes included
+(`same_curvature_congruence` is the geometric form). -/
+theorem same_curvature_motion {n : ℕ}
+    (W₁ W₂ : Matrix (Fin (n + 2)) (Fin 2 ⊕ Fin n) ℝ)
+    (hW₁ : W₁ᵀ * descartesQ n * W₁ = augmentedTarget n)
+    (hW₂ : W₂ᵀ * descartesQ n * W₂ = augmentedTarget n)
+    (hb : ∀ i, W₁ i (Sum.inl 1) = W₂ i (Sum.inl 1)) :
+    ∃! p : Matrix (Fin n) (Fin n) ℝ × (Fin n → ℝ),
+      p.1ᵀ * p.1 = 1 ∧ W₁ * rigidMotionMatrix p.1 p.2 = W₂ := sorry
+
+/-- The motion's parameters from the two matrices: with `W₁ = [a | b | X]`, `W₂ = [a' | b | X']` and
+`W₁ * rigidMotionMatrix O t = W₂`, `O = ½ Xᵀ Qₙ X'` and `t = −¼ aᵀ Qₙ X'` (row-vector convention; read from
+`W₁⁻¹ = ½ G W₁ᵀ Qₙ`, so no hypothesis on `O` or on `W₂` is needed). -/
+theorem rigidMotion_parameters {n : ℕ}
+    (W₁ W₂ : Matrix (Fin (n + 2)) (Fin 2 ⊕ Fin n) ℝ)
+    (hW₁ : W₁ᵀ * descartesQ n * W₁ = augmentedTarget n)
+    (O : Matrix (Fin n) (Fin n) ℝ) (t : Fin n → ℝ)
+    (h : W₁ * rigidMotionMatrix O t = W₂) :
+    (∀ k l, O k l = (1 / 2 : ℝ) *
+      ((fun i => W₁ i (Sum.inr k)) ⬝ᵥ (descartesQ n *ᵥ (fun i => W₂ i (Sum.inr l))))) ∧
+    ∀ l, t l = (-1 / 4 : ℝ) *
+      ((fun i => W₁ i (Sum.inl 0)) ⬝ᵥ (descartesQ n *ᵥ (fun i => W₂ i (Sum.inr l)))) := sorry
+
+/-- For `Oᵀ O = 1` the point map `x ↦ x O + t` is an isometry. -/
+theorem rigidMotionPoint_isometry {n : ℕ} (O : Matrix (Fin n) (Fin n) ℝ)
+    (hO : Oᵀ * O = 1) (t : Fin n → ℝ) : Isometry (rigidMotionPoint O t) := sorry
+
+/-- On a sphere row the matrix acts as the motion: centre `x ↦ x O + t`, signed radius fixed (`Oᵀ O = 1` is
+needed; at `r = 0` both sides are the zero row). -/
+theorem rigidMotionMatrix_sphereRow {n : ℕ} (O : Matrix (Fin n) (Fin n) ℝ)
+    (hO : Oᵀ * O = 1) (t : Fin n → ℝ) (x : EuclideanSpace ℝ (Fin n)) (r : ℝ) :
+    sphereRow x r ᵥ* rigidMotionMatrix O t = sphereRow (rigidMotionPoint O t x) r := sorry
+
+/-- On a hyperplane row the matrix multiplies the normal by `O` and moves the offset: `h ↦ h O`,
+`δ ↦ δ + (h O) ⬝ᵥ t`; no hypothesis on `O`, since a hyperplane row has curvature `0`. -/
+theorem rigidMotionMatrix_planeRow {n : ℕ} (O : Matrix (Fin n) (Fin n) ℝ)
+    (t : Fin n → ℝ) (h : EuclideanSpace ℝ (Fin n)) (δ : ℝ) :
+    planeRow h δ ᵥ* rigidMotionMatrix O t =
+      planeRow (rigidMotionPoint O 0 h) (δ + ((fun k => h k) ᵥ* O) ⬝ᵥ t) := sorry
+
+/-- The congruence half of the converse of the Soddy–Gosset theorem (LMW Theorem 3.1; GLMWY III arXiv v1–v2,
+Theorem 2.2 (ii)), with uniqueness: two valid, pairwise tangent families with the same curvatures, index by index,
+are carried one to the other by exactly one Euclidean motion `x ↦ x O + t`, `Oᵀ O = 1` (reflections and
+hyperplanes included; tangency in the signed-distance sense). -/
+theorem same_curvature_congruence {n : ℕ} (hn : 0 < n)
+    (s s' : Fin (n + 2) → OrientedSphere n)
+    (hs : ∀ i, OrientedSphere.IsValid (s i))
+    (hs' : ∀ i, OrientedSphere.IsValid (s' i))
+    (ht : ∀ i j, i ≠ j → OrientedSphere.Tangent (s i) (s j))
+    (ht' : ∀ i j, i ≠ j → OrientedSphere.Tangent (s' i) (s' j))
+    (hb : ∀ i, OrientedSphere.curvature (s i) = OrientedSphere.curvature (s' i)) :
+    ∃! p : Matrix (Fin n) (Fin n) ℝ × (Fin n → ℝ),
+      p.1ᵀ * p.1 = 1 ∧ ∀ i, rigidMotionOf p.1 p.2 (s i) = s' i := sorry
+
+/-! ## Compatible orientations -/
+
+/-- The power polynomial of a sphere row is `(dist(y, x)² − r²)/r`. -/
+theorem rowPower_sphereRow {n : ℕ} (x y : EuclideanSpace ℝ (Fin n))
+    (r : ℝ) (hr : r ≠ 0) :
+    rowPower (sphereRow x r) y = (dist y x ^ 2 - r ^ 2) / r := sorry
+
+/-- The power polynomial of a hyperplane row is `2(δ − ⟪h, y⟫)`. -/
+theorem rowPower_planeRow {n : ℕ} (h y : EuclideanSpace ℝ (Fin n))
+    (δ : ℝ) : rowPower (planeRow h δ) y = 2 * (δ - inner ℝ h y) := sorry
+
+/-- For `r > 0` the power is negative exactly on the open ball `dist(y, x) < r`. -/
+theorem rowPower_sphereRow_neg_iff_of_pos {n : ℕ}
+    (x y : EuclideanSpace ℝ (Fin n)) (r : ℝ) (hr : 0 < r) :
+    rowPower (sphereRow x r) y < 0 ↔ dist y x < r := sorry
+
+/-- For `r < 0` the power is negative exactly on the open exterior `−r < dist(y, x)`. -/
+theorem rowPower_sphereRow_neg_iff_of_neg {n : ℕ}
+    (x y : EuclideanSpace ℝ (Fin n)) (r : ℝ) (hr : r < 0) :
+    rowPower (sphereRow x r) y < 0 ↔ -r < dist y x := sorry
+
+/-- The power of a hyperplane row is negative exactly on the open half-space `δ < ⟪h, y⟫` into which `h`
+points. -/
+theorem rowPower_planeRow_neg_iff {n : ℕ}
+    (h y : EuclideanSpace ℝ (Fin n)) (δ : ℝ) :
+    rowPower (planeRow h δ) y < 0 ↔ δ < inner ℝ h y := sorry
+
+/-- Compatible orientations (LMW §3, the definition of an oriented Descartes configuration: interiors disjoint with
+the given orientations or with all reversed; the total curvature is never zero and its sign fixes the orientation,
+GLMWY III §3.1, p. 6): for a solution of the identity the total curvature `B = Σ W k (Sum.inl 1)` is nonzero, and no point
+`y` has `B Fᵢ(y) < 0` and `B Fⱼ(y) < 0` for two rows `i ≠ j`, `Fᵢ = rowPower (W i)`. -/
+theorem augmented_orientation {n : ℕ} (hn : 0 < n)
+    (W : Matrix (Fin (n + 2)) (Fin 2 ⊕ Fin n) ℝ)
+    (hW : Wᵀ * descartesQ n * W = augmentedTarget n) :
+    (∑ k, W k (Sum.inl 1)) ≠ 0 ∧
+      ∀ (i j : Fin (n + 2)), i ≠ j → ∀ y : EuclideanSpace ℝ (Fin n),
+        ¬ ((∑ k, W k (Sum.inl 1)) * rowPower (W i) y < 0 ∧
+          (∑ k, W k (Sum.inl 1)) * rowPower (W j) y < 0) := sorry
+
+/-- The same as disjoint sets: `{y | B Fᵢ(y) < 0}` and `{y | B Fⱼ(y) < 0}` are disjoint for `i ≠ j`. -/
+theorem augmented_orientation_disjoint {n : ℕ} (hn : 0 < n)
+    (W : Matrix (Fin (n + 2)) (Fin 2 ⊕ Fin n) ℝ)
+    (hW : Wᵀ * descartesQ n * W = augmentedTarget n)
+    (i j : Fin (n + 2)) (hij : i ≠ j) :
+    Disjoint {y : EuclideanSpace ℝ (Fin n) |
+      (∑ k, W k (Sum.inl 1)) * rowPower (W i) y < 0}
+      {y : EuclideanSpace ℝ (Fin n) |
+        (∑ k, W k (Sum.inl 1)) * rowPower (W j) y < 0} := sorry
+
+/-- At most two rows of a solution of the identity have zero curvature, the hyperplane rows (the four cases of the
+curvature vector of a positively oriented configuration, GLMWY III §3.1, p. 6; LMW's list after Theorem 3.1), by
+Cauchy–Schwarz. -/
+theorem augmented_no_three_zero_curvatures {n : ℕ} (hn : 0 < n)
+    (W : Matrix (Fin (n + 2)) (Fin 2 ⊕ Fin n) ℝ)
+    (hW : Wᵀ * descartesQ n * W = augmentedTarget n)
+    (i j k : Fin (n + 2)) (hij : i ≠ j) (hik : i ≠ k) (hjk : j ≠ k) :
+    ¬ (W i (Sum.inl 1) = 0 ∧ W j (Sum.inl 1) = 0 ∧ W k (Sum.inl 1) = 0) := sorry
+
+/-- No three rows of a solution of the identity have power `0` at one point `y` of `ℝⁿ`: no three boundaries share
+a finite point (LMW's distinct tangencies, at finite points). -/
+theorem augmented_no_three_boundaries {n : ℕ} (hn : 0 < n)
+    (W : Matrix (Fin (n + 2)) (Fin 2 ⊕ Fin n) ℝ)
+    (hW : Wᵀ * descartesQ n * W = augmentedTarget n)
+    (i j k : Fin (n + 2)) (hij : i ≠ j) (hik : i ≠ k) (hjk : j ≠ k)
+    (y : EuclideanSpace ℝ (Fin n)) :
+    ¬ (rowPower (W i) y = 0 ∧ rowPower (W j) y = 0 ∧ rowPower (W k) y = 0) := sorry
+
+/-! ## Euclidean motions on configurations, and the geometric forms -/
+
+/-- A Euclidean motion preserves validity. -/
+theorem rigidMotionOf_isValid {n : ℕ} (O : Matrix (Fin n) (Fin n) ℝ) (hO : Oᵀ * O = 1)
+    (t : Fin n → ℝ) (s : OrientedSphere n) (hs : OrientedSphere.IsValid s) :
+    OrientedSphere.IsValid (rigidMotionOf O t s) := sorry
+
+/-- A Euclidean motion preserves the signed curvature. -/
+theorem rigidMotionOf_curvature {n : ℕ} (O : Matrix (Fin n) (Fin n) ℝ) (t : Fin n → ℝ)
+    (s : OrientedSphere n) :
+    OrientedSphere.curvature (rigidMotionOf O t s) = OrientedSphere.curvature s := sorry
+
+/-- The augmented matrix of a motion preserves the Lorentz pairing of rows. -/
+theorem lorentz_vecMul_rigidMotionMatrix {n : ℕ} (O : Matrix (Fin n) (Fin n) ℝ)
+    (hO : Oᵀ * O = 1) (t : Fin n → ℝ) (w w' : Fin 2 ⊕ Fin n → ℝ) :
+    lorentz (w ᵥ* rigidMotionMatrix O t) (w' ᵥ* rigidMotionMatrix O t) = lorentz w w' := sorry
+
+/-- A Euclidean motion preserves tangency of valid objects. -/
+theorem rigidMotionOf_tangent_iff {n : ℕ} (O : Matrix (Fin n) (Fin n) ℝ) (hO : Oᵀ * O = 1)
+    (t : Fin n → ℝ) (s u : OrientedSphere n) (hs : OrientedSphere.IsValid s)
+    (hu : OrientedSphere.IsValid u) :
+    OrientedSphere.Tangent (rigidMotionOf O t s) (rigidMotionOf O t u) ↔ OrientedSphere.Tangent s u := sorry
+
+/-- Two labelled families of valid, pairwise tangent oriented spheres and hyperplanes are congruent exactly
+when their curvature vectors agree (LMW Theorem 3.1's congruence half as an equivalence). -/
+theorem congruent_iff_same_curvature {n : ℕ} (hn : 0 < n)
+    (s s' : Fin (n + 2) → OrientedSphere n)
+    (hs : ∀ i, OrientedSphere.IsValid (s i)) (hs' : ∀ i, OrientedSphere.IsValid (s' i))
+    (ht : ∀ i j, i ≠ j → OrientedSphere.Tangent (s i) (s j))
+    (ht' : ∀ i j, i ≠ j → OrientedSphere.Tangent (s' i) (s' j)) :
+    (∃ O : Matrix (Fin n) (Fin n) ℝ, ∃ t : Fin n → ℝ, Oᵀ * O = 1 ∧ ∀ i, rigidMotionOf O t (s i) = s' i) ↔
+      ∀ i, OrientedSphere.curvature (s i) = OrientedSphere.curvature (s' i) := sorry
+
+/-- The total curvature of a family of valid, pairwise tangent oriented spheres and hyperplanes is never zero
+(GLMWY III §3.1, p. 6, for configurations). -/
+theorem tangent_family_curvature_sum_ne_zero {n : ℕ} (hn : 0 < n)
+    (s : Fin (n + 2) → OrientedSphere n) (hs : ∀ i, OrientedSphere.IsValid (s i))
+    (ht : ∀ i j, i ≠ j → OrientedSphere.Tangent (s i) (s j)) :
+    (∑ i, OrientedSphere.curvature (s i)) ≠ 0 := sorry
+
+/-- A family of valid, pairwise tangent oriented spheres and hyperplanes with positive total curvature has
+pairwise disjoint open interiors (LMW §3's compatible orientations, for the family itself): the open ball of a
+positive-radius sphere, the open exterior of a negative-radius sphere, the open half-space into which a
+hyperplane's normal points (`rowPower_sphereRow_neg_iff_of_pos`, `rowPower_sphereRow_neg_iff_of_neg`,
+`rowPower_planeRow_neg_iff`). -/
+theorem tangent_family_interiors_disjoint {n : ℕ} (hn : 0 < n)
+    (s : Fin (n + 2) → OrientedSphere n) (hs : ∀ i, OrientedSphere.IsValid (s i))
+    (ht : ∀ i j, i ≠ j → OrientedSphere.Tangent (s i) (s j))
+    (hpos : 0 < ∑ i, OrientedSphere.curvature (s i)) (i j : Fin (n + 2)) (hij : i ≠ j) :
+    Disjoint {y : EuclideanSpace ℝ (Fin n) | rowPower (OrientedSphere.row (s i)) y < 0}
+      {y : EuclideanSpace ℝ (Fin n) | rowPower (OrientedSphere.row (s j)) y < 0} := sorry
+
+/-- At most two members of a family of valid, pairwise tangent oriented spheres and hyperplanes are hyperplanes. -/
+theorem tangent_family_two_hyperplanes {n : ℕ} (hn : 0 < n)
+    (s : Fin (n + 2) → OrientedSphere n) (hs : ∀ i, OrientedSphere.IsValid (s i))
+    (ht : ∀ i j, i ≠ j → OrientedSphere.Tangent (s i) (s j))
+    (i j k : Fin (n + 2)) (hij : i ≠ j) (hik : i ≠ k) (hjk : j ≠ k) :
+    ¬ (OrientedSphere.curvature (s i) = 0 ∧ OrientedSphere.curvature (s j) = 0 ∧
+      OrientedSphere.curvature (s k) = 0) := sorry
 
 end AugmentedDescartes

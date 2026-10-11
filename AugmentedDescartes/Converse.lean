@@ -39,7 +39,7 @@ theorem conv_decodeRow_of_ne {n : ℕ} (w : Fin 2 ⊕ Fin n → ℝ) (hw : w (Su
 
 /-- The converse of LMW Theorem 3.3 (spheres and hyperplanes): every real solution is the augmented matrix
 of exactly one family of valid, pairwise tangent oriented spheres and hyperplanes (tangency in the
-signed-distance sense; disjoint interiors not asserted). -/
+signed-distance sense; compatible orientations in `augmented_orientation`). -/
 theorem augmented_descartes_converse_internal {n : ℕ} (hn : 0 < n) (W : Matrix (Fin (n + 2)) (Fin 2 ⊕ Fin n) ℝ)
     (hW : Wᵀ * descartesQ n * W = augmentedTarget n) :
     ∃! s : Fin (n + 2) → OrientedSphere n, (∀ i, OrientedSphere.IsValid (s i)) ∧

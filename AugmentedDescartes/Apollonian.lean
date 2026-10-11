@@ -194,7 +194,7 @@ theorem two_tangent_rows_internal {n : ℕ} (hn : 2 ≤ n) (W : Matrix (Fin (n +
     rw [Finset.sum_congr rfl fun m _ => this m, Finset.sum_ite_eq]
     simp
   refine ⟨fun w => ⟨fun ⟨hww, hwi⟩ => ?_, fun hw => ?_⟩, fun heq => ?_⟩
-  · -- the forward direction: solve for the row coefficients `c = w Vᵀ`
+  · -- the forward direction: solve for the row coefficients `c = w V`
     set V := ((1 / 2 : ℝ) • lorentzG n) * Wᵀ * descartesQ n with hV
     set c := w ᵥ* V with hc
     have hcW : c ᵥ* W = w := by rw [hc, Matrix.vecMul_vecMul, hVW, Matrix.vecMul_one]
@@ -255,8 +255,8 @@ theorem two_tangent_rows_internal {n : ℕ} (hn : 2 ≤ n) (W : Matrix (Fin (n +
     rw [Matrix.one_apply_eq, apo_apollonianGen_apply, ite_eq_left rfl, ite_eq_left rfl, apo_diag hn] at this
     norm_num at this
 
-/-- Soddy's two spheres, geometrically (the signed count; LMW's footnote 3 counts the real spheres tangent
-to any `n + 1` mutually tangent spheres with distinct tangencies): given `n + 1` members of a configuration,
+/-- Soddy's two spheres, geometrically (the signed count; LMW's footnote 3: the real circles tangent to each of `n + 1` mutually tangent real circles "with distinct
+tangents" number exactly two): given `n + 1` members of a configuration,
 exactly two valid oriented spheres or hyperplanes are tangent to all of them in the signed sense, the missing
 member and one other, and their curvatures sum to `(2/(n−1)) Σ` of the others' curvatures. -/
 theorem two_tangent_spheres_internal {n : ℕ} (hn : 2 ≤ n) (s : Fin (n + 2) → OrientedSphere n)

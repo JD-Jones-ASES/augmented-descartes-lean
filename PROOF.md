@@ -53,3 +53,53 @@ directly in Euclidean coordinates.
    `n = 2` with columns `0, e₀ − e₁, e₂ − e₃` solves the equation (it is the curvature–centre matrix of four oriented
    lines with normals `±e₀, ±e₁`) and no valid, pairwise tangent family has it: such a family's augmented matrix would
    satisfy the identity with `(inl 0, inl 1)` entry `⟨b̄, 0⟩ = 0 ≠ −4`.
+9. **Compatible orientations** (`Orientation.lean`). Write row `i` as `(aᵢ, bᵢ, vᵢ)` and
+   `Fᵢ(y) := rowPower (W i) y = bᵢ ‖y‖² − 2 vᵢ ⬝ᵥ y + aᵢ`. On a sphere row `F = (dist y x ² − r²)/r`, on a hyperplane row
+   `F = 2(δ − ⟪h, y⟫)`, so `F < 0` is the open ball (`r > 0`), the open exterior of the ball of radius `−r` (`r < 0`)
+   or the open half-space `⟪h, y⟫ > δ` (`F(y) = −2 lorentz (W i) (‖y‖², 1, y)`, the power of `y` with respect to the
+   sphere divided by `r`; cf. the separation of GLMWY III, Definition 7.1, arXiv v1–v2 Definition 5.1). With
+   `u(y) := (1, ‖y‖², −2y)`, `W *ᵥ u(y) = F(y)` and `u(y)ᵀ T u(y) = −8‖y‖² + 2·4‖y‖² = 0` (`T` the target), so
+   `F(y)ᵀ Qₙ F(y) = 0`: `(Σ Fᵢ)² = n Σ Fᵢ²`. Let `A = Σ aᵢ`, `B = Σ bᵢ`, `V = Σ vᵢ`; the Gram form `W G Wᵀ = 2•1 − J`
+   summed over all entries is `lorentz (Σ wᵢ) (Σ wᵢ) = −AB + ‖V‖² = 2(n + 2) − (n + 2)²`, so `AB − ‖V‖² = n(n + 2)`
+   and, completing the square, `B Σ Fᵢ(y) = B²‖y‖² − 2B V ⬝ᵥ y + AB = ‖B y − V‖² + n(n + 2) > 0` (`n > 0`). Hence
+   `B ≠ 0` (GLMWY III §3.1, p. 6, state this for configurations) and its sign is the orientation. Two Cauchy–Schwarz lemmas on
+   a vector `z` of length `n + 2` with `(Σ z)² = n Σ z²`: (a) if `Σ z > 0` no two entries are negative, for if
+   `zᵢ, zⱼ < 0` the other `n` entries sum to `S > Σ z > 0` and `S² ≤ n Σ_{k ≠ i, j} zₖ² ≤ n Σ z² = (Σ z)² < S²`; (b) if
+   `Σ z ≠ 0` no three entries vanish, for the other `n − 1` entries give `(Σ z)² ≤ (n − 1) Σ z²`, so `Σ z² ≤ 0`,
+   `z = 0`, `Σ z = 0`. The relation is homogeneous, so (a) applies to `z = B • F(y)`, whose sum is `B Σ Fᵢ(y) > 0`:
+   the sets `{y | B Fᵢ(y) < 0}` are pairwise disjoint (`augmented_orientation`, `augmented_orientation_disjoint`);
+   for `B > 0` they are the given interiors, for `B < 0` the interiors of every reversed row. (b) applied to `b`,
+   null by the `(inl 1, inl 1)` entry of the identity and with `Σ b = B ≠ 0`, leaves at most two hyperplane rows
+   (the four cases of GLMWY III §3.1, p. 6, and LMW's list after Theorem 3.1); applied to `F(y)`, with `Σ Fᵢ(y) ≠ 0`, it
+   leaves no point `y` on three boundaries `{Fᵢ = 0}` (LMW's distinct tangencies, at finite points).
+10. **Congruence** (`Rigidity.lean`). Let `W₁, W₂` satisfy the identity with the same curvature column, and let
+    `e_b := Pi.single (inl 1) 1`. With `V₁ := ((1/2) • G) * W₁ᵀ * Qₙ` (item 5: `V₁ W₁ = W₁ V₁ = 1`), `H := V₁ W₂`
+    satisfies `W₁ H = W₂`, `Hᵀ T H = W₂ᵀ Qₙ W₂ = T` (from `Qₙ = V₁ᵀ T V₁`) and `H e_b = V₁ (W₂ e_b) = V₁ (W₁ e_b) = e_b`.
+    A matrix in the group of `T` that fixes `e_b` is a motion matrix (the little group of a null vector in the
+    Lorentz group is the Euclidean group; the inclusion is computed here directly): `(Hᵀ T H) e_b = T e_b = −4 e_{b̄}` gives `Hᵀ e_{b̄} = e_{b̄}`, so
+    the `inl 0` row of `H` is `(1, 0, 0)`; write the `inl 1` row `(c, 1, t)` and the spatial rows `(u, 0, O)`. Then
+    the spatial–spatial entries of `Hᵀ T H = T` give `2 Oᵀ O = 2•1`, the `(inl 0, inr l)` entries
+    `−4 tₗ + 2 (Oᵀ u)ₗ = 0`, so `u = 2 O t` (`O Oᵀ = 1` for a square matrix), and the `(inl 0, inl 0)` entry
+    `−8c + 2‖u‖² = 0`, so `c = ‖t‖²`: `H = rigidMotionMatrix O t = [[1, 0, 0], [‖t‖², 1, t], [2 O t, 0, O]]`, the
+    product of the translation and rotation matrices of GLMWY III's Theorem 9.1 (arXiv v1–v2 Theorem 3.1). Unique,
+    since `W₁` is invertible and `(O, t) ↦ rigidMotionMatrix O t` is injective (`same_curvature_motion`). Reading
+    `H = ((1/2) • G) W₁ᵀ Qₙ W₂` at the spatial block (`G`'s is `1`) and at the `(inl 1, inr l)` entries (`G`'s
+    `inl 1` row is `(−½, 0, 0)`) gives `O = ½ X₁ᵀ Qₙ X₂` and `t = −¼ a₁ᵀ Qₙ X₂` (`rigidMotion_parameters`, from
+    `W₁ H = W₂` alone). Rows are row vectors: `sphereRow x r ᵥ* H = sphereRow (x O + t) r`, since
+    `‖x O + t‖² = ‖x‖² + 2 x ⬝ᵥ (O t) + ‖t‖²` when `O Oᵀ = 1` (at `r = 0` both sides are the zero row), and
+    `planeRow h δ ᵥ* H = planeRow (h O) (δ + (h O) ⬝ᵥ t)` with no hypothesis on `O`; `x ↦ x O + t` is an isometry;
+    `rigidMotionOf O t` keeps radii nonzero and unit normals unit, so it maps valid objects to valid objects with
+    `row (rigidMotionOf O t s) = row s ᵥ* H`. For two valid, pairwise tangent families with equal curvatures the
+    forward theorem gives `W₁, W₂` with one curvature column; `row_injOn_valid` turns `W₁ H = W₂` into
+    `rigidMotionOf O t (s i) = s' i` for each `i`, and any motion doing so gives `W₁ (rigidMotionMatrix O' t') = W₂`,
+    so `(O', t') = (O, t)` (`same_curvature_congruence`). LMW Theorem 3.1 and GLMWY III's arXiv v1–v2 Theorem 2.2 (ii) state a
+    motion; GLMWY III's arXiv v1–v2 prove it by the rigidity of a simplex of centres (pp. 12–14); the uniqueness and
+    the formulas are proved here.
+11. **Motions on configurations** (`Motion.lean`). `rigidMotionOf` keeps validity (item 10) and curvature (by cases
+    on the object); `rigidMotionMatrix O t` preserves the Lorentz pairing when `Oᵀ O = 1`: expand the three
+    coordinates of `w ᵥ* H` by the row formulas of item 10 and use `(x ᵥ* O) ⬝ᵥ (y ᵥ* O) = x ⬝ᵥ y` and
+    `(x ᵥ* O) ⬝ᵥ t = x ⬝ᵥ (O t)`, after which the terms in `t` cancel. So tangency of valid objects is preserved
+    through item 1, and with item 10 two valid, pairwise tangent families are congruent exactly when their
+    curvature vectors agree. The geometric orientation statements are item 9 for `augmentedMatrixOf s` through the
+    forward theorem (item 3), the curvature column being the curvatures of `s`; for `B > 0` the factor `B` drops out
+    of `{y | B F < 0}`.

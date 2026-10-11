@@ -2,7 +2,7 @@
 version: "v0.4"
 
 project:
-  name: "The augmented Descartes theorem in every dimension, W^T Q_n W = [[0,-4,0],[-4,0,0],[0,0,2I_n]] for n + 2 pairwise tangent oriented spheres and hyperplanes, its converse, the existence half of Soddy-Gosset's converse, the curvature-centre converse for a nonzero first column, and Soddy's two spheres"
+  name: "The augmented Descartes theorem in every dimension, W^T Q_n W = [[0,-4,0],[-4,0,0],[0,0,2I_n]] for n + 2 tangent oriented spheres and hyperplanes, its converse, both halves of Soddy-Gosset's converse, compatible orientations, the curvature-centre converse (nonzero first column), Soddy's two spheres"
   description: >-
     A Lean 4 development of Section 3 of Lagarias, Mallows and Wilks, Beyond the Descartes circle theorem
     (Amer. Math. Monthly 109 (2002) 338-361), in the Lorentz form. An oriented sphere in R^n with centre x and
@@ -10,8 +10,11 @@ project:
     <h, y> = delta with unit normal h has the row (2 delta, 0, h) (LMW Definition 3.2, (3.7)-(3.9)). Tangency is
     distance-encoded in LMW's oriented sense: two spheres dist^2 = (r + s)^2 (external tangency for two
     positive radii, internal when one radius is negative), a sphere and a hyperplane <h, x> - delta = -r, two
-    hyperplanes opposite unit normals, LMW's oriented tangency pair by pair; the disjoint-interiors property of
-    an oriented Descartes configuration is not formalized, and the converses deliver tangency in this sense.
+    hyperplanes opposite unit normals, LMW's oriented tangency pair by pair, and the converses deliver tangency in
+    this sense; the compatible orientations of an oriented Descartes configuration (disjoint interiors, with the
+    given orientations or all reversed) are proved separately for every solution, after multiplying each row's
+    power polynomial by the total curvature, and for a valid, pairwise tangent family with positive total
+    curvature for its own open interiors.
     Kernel-checked, for every n >= 1 (LMW's Section 3 assumes n >= 2; their Section 8, (8.4), is the identity on
     the line): the augmented matrix W of n + 2 pairwise tangent spheres of nonzero curvature, and of n + 2
     pairwise tangent spheres and hyperplanes, satisfies W^T Q_n W = [[0, -4, 0], [-4, 0, 0], [0, 0, 2 I_n]] with
@@ -26,15 +29,27 @@ project:
     -1/r_e). The matrix identity is proved as LMW's Section 4 argument (Lemmas 4.3-4.4, (4.9)-(4.10)) run
     directly in Euclidean coordinates: W^T Q_n W is the target exactly when the rows of W have Lorentz norm 1
     and pair to -1 under G = [[0, -1/2, 0], [-1/2, 0, 0], [0, 0, I_n]], since W G W^T = 2I - J and
-    (2I - J)(Q_n/2) = I. Also proved: the existence half of the converse of the Soddy-Gosset theorem (every
-    nonzero b with (sum b_i)^2 = n sum b_i^2 is the curvature vector of a pairwise tangent family of spheres,
-    where b_i is nonzero, and hyperplanes, where b_i = 0, and of a family of spheres when no b_i vanishes),
-    the first half of the converse LMW state as Theorem 3.1, about which they write "We do not know an easy
-    proof of this result; a proof appears in [16]" ([16] is Graham-Lagarias-Mallows-Wilks-Yan III, whose arXiv
-    versions 1-2 prove both halves as their Theorem 2.2 from the same base configuration and the transitivity
-    of the Lorentz group, a section the published version omits), proved here by one Q_n-reflection from the
-    configuration of two parallel hyperplanes and n unit spheres in the proof of GLMWY III's Theorem 6.1, or
-    from its inversion in the unit sphere; the congruence half is not formalized. The converse of Theorem 3.2
+    (2I - J)(Q_n/2) = I. Also proved: both halves of the converse of the Soddy-Gosset theorem, LMW's Theorem 3.1,
+    about which they write "We do not know an easy proof of this result; a proof appears in [16]" ([16] is
+    Graham-Lagarias-Mallows-Wilks-Yan III, whose arXiv versions 1-2 prove both halves as their Theorem 2.2 from
+    the same base configuration and the transitivity of the Lorentz group, a section the published version
+    omits). Existence: every nonzero b with (sum b_i)^2 = n sum b_i^2 is the curvature vector of a pairwise
+    tangent family of spheres, where b_i is nonzero, and hyperplanes, where b_i = 0, and of a family of spheres
+    when no b_i vanishes, by one Q_n-reflection from the configuration of two parallel hyperplanes and n unit
+    spheres in the proof of GLMWY III's Theorem 6.1, or from its inversion in the unit sphere. Congruence: two
+    valid, pairwise tangent families with the same curvatures, index by index, are carried one to the other by
+    exactly one Euclidean motion x -> x O + t with O^T O = I, reflections and hyperplanes included, with
+    O = (1/2) X^T Q_n X' and t = -(1/4) a^T Q_n X' for augmented matrices [a | b | X] and [a' | b | X'] and the
+    motion's action on points, spheres and hyperplanes; W_1^-1 W_2 preserves the target form and fixes the
+    curvature coordinate, and every such matrix is a motion matrix (GLMWY III's arXiv v1-v2 argue instead by
+    the rigidity of a simplex of centres); its uniqueness and parameters are proved here. A motion preserves validity, curvature and tangency, so two
+    valid, pairwise tangent families are congruent exactly when their curvature vectors agree. For every
+    solution W: the total curvature B is nonzero, the open sets {y : B F_i(y) < 0}, F_i(y) = b_i |y|^2 -
+    2 <v_i, y> + a_i the power polynomial of row i (negative exactly inside a ball, outside a ball of negative
+    radius, or on the side of a hyperplane its normal points to), are pairwise disjoint, at most two rows are
+    hyperplanes, and no three boundaries pass through a finite point; for a valid, pairwise tangent family the
+    total curvature is nonzero, at most two members are hyperplanes, and when the total curvature is positive
+    the open interiors are pairwise disjoint. The converse of Theorem 3.2
     in every dimension under the hypothesis of a nonzero first column (every real M with
     M^T Q_n M = diag(0, 2 I_n) and a nonzero first column is the curvature-centre matrix of exactly one family
     of valid, pairwise tangent oriented spheres and hyperplanes), which GLMWY I, Theorem 3.1 and its Remark,
@@ -50,8 +65,10 @@ project:
     Apollonian reflection, two distinct objects whose curvatures sum to (2/(n-1)) times the sum of the others'
     curvatures. The planar Soddy-Gosset relation for four circles of positive radius, pairwise externally
     tangent or with one enclosing circle, is already in Lean in facebookresearch/atlas-lean
-    (descartes_circle_theorem, not registered); no other formalization of these statements was found by the
-    dated searches.
+    (descartes_circle_theorem, not registered); rjwalters/lean-genius and carlok/LeanFrontier treat the planar
+    relation as a definition (its two roots, the same over the complex numbers, integer reflections and parity;
+    LeanFrontier checks it for one family of Ford circles and their tangent line), with no derivation from
+    tangency; no other formalization of these statements was found by the dated searches.
   authors: ["JD Jones"]
   responsible_maintainers: ["JD Jones"]
   license: "MIT"
@@ -72,15 +89,20 @@ sources:
       (2.2), (2.3)), p. 4;
       (3.1) and Theorem 3.1 (the converse to the Soddy-Gosset theorem), p. 7; Theorem 3.2 ((3.5)), p. 8; (3.7),
       Definition 3.2 ((3.8)), (3.9) and Theorem 3.3 ((3.11)), p. 9; footnote 4, p. 10; Section 8 ((8.2)-(8.4)),
-      pp. 22-23. The Monthly print was not read.
+      pp. 22-23; the interior convention, pp. 1-2; (2.4), p. 6; Lemmas 4.3-4.4, p. 12; (5.1)-(5.2), p. 15. The Monthly print
+      was not read.
     relationship: "formalizes"
     author_endorsement: "not-contacted"
     note: >-
       The statement source. Theorem 3.3 (Wᵀ Qₙ W = [[0, −4, 0], [−4, 0, 0], [0, 0, 2Iₙ]] and its converse) for
       spheres of nonzero curvature and for spheres with hyperplanes, with tangency distance-encoded (their oriented
-      Descartes configurations have disjoint interiors; the converses here give tangency in the signed sense only);
+      Descartes configurations also have distinct tangencies and disjoint interiors up to reversing every
+      orientation, proved here separately for every solution: compatible orientations after multiplying by the
+      total curvature, no three boundaries through a finite point);
       its corollaries Theorem 1.2 (Soddy-Gosset; their spelling "Gossett"), Theorem 3.2 and Theorem 2.1 with (2.3);
-      the existence half of Theorem 3.1 (the congruence half is not formalized); the converse of Theorem 3.2 under
+      both halves of Theorem 3.1, existence and congruence ('there is a Euclidean motion taking one to the other',
+      reflections included; the motion unique for families labelled alike is proved here); the converse of
+      Theorem 3.2 under
       the hypothesis of a nonzero first column, which the printed converse omits; footnote 3 (exactly two spheres
       tangent to n + 1 members of a configuration) in signed form for n ≥ 2. The identity at n = 1 is Section 8's
       (8.4), with signed radii in place of Section 8's convention for the infinite interval; the hyperplanes of n = 1
@@ -96,9 +118,10 @@ sources:
       https://arxiv.org/abs/math/0010324v2 (2001-01-24; v1 of 2000-10-31 has the same Section 2 with the form
       normalized as n I − 𝟙𝟙ᵀ), in the normalization Qₙ = I − (1/n)𝟙𝟙ᵀ: Theorem 2.2 (the converse to the
       Soddy-Gosset theorem, printed "Gossett": (i) existence, (ii) congruence), p. 4; Theorem 2.3 ((2.8), (2.9)),
-      pp. 4-5, its converse
-      proof pp. 9-10; Theorem 2.4 and Lemma 2.5, pp. 11-12; the proof of Theorem 2.2, pp. 12-14. Section 2 is absent
-      from v3 (2004-06-16), v4 (2005-03-11) and the journal version.
+      pp. 5-6, its converse proof pp. 9-10; Theorem 2.4 and Lemma 2.5, pp. 11-12; the proof of Theorem 2.2, pp. 12-14; Theorem 3.1 (the
+      translation and rotation matrices on augmented coordinates), p. 15; Definition 5.1 (separation), p. 33. This
+      Section 2 (the generalized Descartes theorem) is absent from v3 (2004-06-16), v4 (2005-03-11) and the journal
+      version.
     relationship: "formalizes"
     author_endorsement: "not-contacted"
     note: >-
@@ -106,7 +129,11 @@ sources:
       existence half, Theorem 2.2 (i), proved along its route: a standard configuration (two parallel hyperplanes at
       distance 2, n unit spheres between them), an element of Aut(Qₙ) carrying its curvature vector to b (here one
       explicit Qₙ-reflection instead of the transitivity of O(n + 1, 1) on the null cone), then the converse of the
-      augmented theorem. Its part (ii), congruence, is not formalized. Theorem 2.3 states the converse of the
+      augmented theorem. Its part (ii), congruence, is same_curvature_congruence, proved here by computing that a matrix which preserves the target form and fixes the curvature
+      coordinate is a motion matrix, rather than by its route (the rigidity of a simplex of centres, pp. 12-14),
+      with the motion unique for families labelled alike and its parameters explicit; its Theorem 3.1 (the
+      published Theorem 9.1) has the translation and rotation matrices on augmented coordinates that
+      rigidMotionMatrix composes. Theorem 2.3 states the converse of the
       curvature-centre identity with no hypothesis; its proof rescales by a positive factor, which uses the positivity clause (2.9), and
       first assumes a first column without zero entries, treating zero entries by a limit it does not carry out;
       curvature_center_converse assumes a nonzero first column (equivalent, under (2.8), to a nonzero sum of
@@ -120,7 +147,10 @@ sources:
       Discrete & Computational Geometry 35 (2006), 37-72; read as arXiv:math/0010324v4 (https://arxiv.org/abs/math/0010324v4,
       2005-03-11), printed pages: Theorem 3.1 (the augmented Euclidean Descartes theorem, proved by citation of LMW),
       p. 8; the determinants of the three forms and Theorem 3.2, p. 9; Section 4.1 and (4.1), p. 11; Theorem 6.1 and its
-      configuration of curvatures (0, 0, 1, ..., 1), p. 20; Lemma 6.4 and (6.4), p. 21. The journal print was not read.
+      configuration of curvatures (0, 0, 1, ..., 1), p. 20; Lemma 6.4 and (6.4), p. 21; Section 3.1, pp. 5-7 (all points of
+      tangency distinct, p. 5; the total orientation, the sum of the curvatures cannot be zero, and the four cases, p. 6;
+      a hyperplane as a limit of spheres, p. 7); Theorem 9.1 and (9.3), p. 31, and its proof with (9.4)-(9.5) and the
+      translation and rotation matrices, pp. 32-33; Definition 7.1 (separation). The journal print was not read.
     relationship: "background"
     author_endorsement: "not-contacted"
     note: >-
@@ -306,6 +336,32 @@ sources:
     author_endorsement: "n/a"
     note: "The library the development imports (tag v4.35.0-rc2): EuclideanSpace, matrices and Matrix.mul_eq_one_comm_of_equiv, EuclideanGeometry.Sphere with IsExtTangent and IsIntTangent."
 
+  - title: "rjwalters/lean-genius: proofs/Proofs/DescartesCircleTheorem.lean and three files built on it"
+    authors: ["rjwalters/lean-genius"]
+    id: "https://github.com/rjwalters/lean-genius/blob/8e7085869ea0f90f1a5e1f8348affc97f75bb9a2/proofs/Proofs/DescartesCircleTheorem.lean"
+    type: "other"
+    location: "descartes_circle, descartesRel_iff_sq, descartes_soddy_forward, descartes_soddy_backward, soddy_sum, soddy_prod (added 2026-06-16 in b54ac1b); DescartesCircleTheoremOQ01OQ01.lean (the relation over the complex numbers), DescartesCircleTheoremOQ01OQ02.lean (integer reflection), DescartesCircleParityOQ010201.lean (parity); unchanged at 8e70858 (2026-09-29); read 2026-10-11 UTC, not built; the repository has no license"
+    relationship: "other"
+    author_endorsement: "not-contacted"
+    note: >-
+      Facts about the equation (sum k_i)^2 = 2 sum k_i^2 taken as a definition: its two roots in k_4 with their
+      sum and product, the same over the complex numbers, the integer reflection and parity. The file says it does
+      not derive the relation from tangency. The sum of the roots is the curvature part of two_tangent_rows at
+      n = 2. No code is shared.
+
+  - title: "carlok/LeanFrontier: NumberTheory/DescartesCircle.lean, NumberTheory/DescartesCurvatureAction.lean, Geometry/FordCircleDescartes.lean"
+    authors: ["carlok/LeanFrontier"]
+    id: "https://github.com/carlok/LeanFrontier/blob/bb432f13a234e682dec83ba94e427d684d9825c5/LeanFrontier/NumberTheory/DescartesCircle.lean"
+    type: "other"
+    location: "eq_or_eq_reflect, isQuadruple_reflect, curvatureReflection, farey_mediant_descartes_configuration (2026-08-17 to 2026-09-29); main bb432f1 (2026-10-09); read 2026-10-11 UTC, not built; Apache-2.0"
+    relationship: "other"
+    author_endorsement: "not-contacted"
+    note: >-
+      The relation as a definition over a commutative ring, its two roots in the fourth curvature and the
+      reflections; one geometric instance: two Ford circles, their mediant and the line under them are pairwise
+      tangent and their curvatures satisfy the relation, by direct computation for that family. No code is
+      shared.
+
 related_formalizations:
   - id: "https://github.com/facebookresearch/atlas-lean/blob/27a38cfdcea9e80a11c49ff8e2ce17650e264552/MathlibExt/Geometry/Euclidean/DescartesCircleTheorem.lean"
     relationship: "independent"
@@ -313,8 +369,8 @@ related_formalizations:
       descartes_circle_theorem (facebookresearch/atlas-lean, imported 2026-10-05, unchanged in content at main
       02e016d on 2026-10-10): a sorry-free Lean proof of the planar Soddy-Gosset relation for four circles of positive
       radius, all externally tangent or one enclosing, tangency distance-encoded, by a planar Gram determinant. It is
-      the case n = 2 of soddy_gosset and sphere_soddy_gosset_enclosing here, which are not new at n = 2. No centres,
-      no matrix identity, no converse, no higher dimension; unregistered. No code is shared.
+      the case n = 2 of soddy_gosset and sphere_soddy_gosset_enclosing here, which are not new at n = 2. Centres occur in its distance hypotheses, but it proves no
+      curvature-centre identity, no augmented matrix identity, no converse, no higher dimension; unregistered. No code is shared.
   - id: "http://archive.reu.dimacs.rutgers.edu/2022/am3374/public_html/"
     relationship: "other"
     note: "A 2022 DIMACS REU Lean attempt at the Soddy-Gosset theorem (A. Mohandas, mentor A. Kontorovich): definitions only; the preliminary lemmas and the main statement unfinished in Lean; no repository is linked."
@@ -328,9 +384,17 @@ related_formalizations:
     relationship: "other"
     note: "Integer bend reflections at n = 3 preserving the Soddy-Gosset quadric (the case n = 3 of apollonianGen_mem_aut on curvature vectors), algebraic only. No code is shared."
 
+  - id: "https://github.com/rjwalters/lean-genius/blob/8e7085869ea0f90f1a5e1f8348affc97f75bb9a2/proofs/Proofs/DescartesCircleTheorem.lean"
+    relationship: "other"
+    note: "The planar relation as a definition, its roots over the reals and the complex numbers, integer reflection and parity; no tangency. Read at the pinned commit on 2026-10-11 UTC, not built. No code is shared."
+
+  - id: "https://github.com/carlok/LeanFrontier/blob/bb432f13a234e682dec83ba94e427d684d9825c5/LeanFrontier/NumberTheory/DescartesCircle.lean"
+    relationship: "other"
+    note: "The planar relation as a definition and its reflections; one Ford-circle family as an instance at n = 2, by direct computation. Read at main bb432f1 on 2026-10-11 UTC, not built. No code is shared."
+
 status:
   scope: >-
-    Thirty-six compared theorems over eighteen compared definitions (namespace AugmentedDescartes): the eight
+    Fifty-nine compared theorems over twenty-two compared definitions (namespace AugmentedDescartes): the eight
     encoding theorems (Lorentz norms and pairings of sphere and hyperplane rows, the decoding of a unit row, the
     injectivity of augmented coordinates on valid objects), the Lorentz form of the matrix identity and its Gram
     form, the identity for spheres and for spheres with hyperplanes, its converse with uniqueness in both forms,
@@ -338,9 +402,18 @@ status:
     theorem and its mixed relation, det Q_n = -2/n, the three statements for Mathlib's spheres, the existence
     of a configuration and of a sphere family in every dimension, the converse of Soddy-Gosset in two forms, the
     converse of the curvature-centre theorem with uniqueness and the matrix showing its hypothesis is needed,
-    and the four Apollonian statements (the generators preserve Q_n, carry configurations to configurations,
-    the row formula, Soddy's two spheres in matrix and in geometric form). All proved; no sorry, no axiom
-    beyond propext, Classical.choice and Quot.sound; no native_decide.
+    the five Apollonian statements (the generators preserve Q_n, carry configurations to configurations, the
+    row formula, Soddy's two spheres in matrix and in geometric form), the six congruence statements (the
+    unique motion in matrix and in geometric form, its parameters, the isometry, the action on sphere and
+    hyperplane rows), the nine orientation statements (the power of a sphere and of a hyperplane row, its
+    three negative sets, compatible orientations as a pointwise and as a disjointness statement, at most two
+    hyperplanes, no three boundaries through a finite point) and the eight statements on motions and the
+    geometric forms (a motion preserves validity, curvature and tangency, the motion matrix preserves the
+    Lorentz pairing, congruence exactly when the curvatures agree, a family's total curvature is nonzero, its
+    open interiors are pairwise disjoint when the total curvature is positive, at most two members are
+    hyperplanes). All proved; no sorry, no axiom beyond propext, Classical.choice and Quot.sound; no
+    native_decide.
+
   main_results:
     - declaration: "AugmentedDescartes.lorentz_sphereRow_self"
       file: "Solution.lean"
@@ -523,6 +596,121 @@ status:
       axioms: ["propext", "Classical.choice", "Quot.sound"]
       comparator_config: "comparator.json"
 
+    - declaration: "AugmentedDescartes.same_curvature_motion"
+      file: "Solution.lean"
+      sorry_count: 0
+      axioms: ["propext", "Classical.choice", "Quot.sound"]
+      comparator_config: "comparator.json"
+    - declaration: "AugmentedDescartes.rigidMotion_parameters"
+      file: "Solution.lean"
+      sorry_count: 0
+      axioms: ["propext", "Classical.choice", "Quot.sound"]
+      comparator_config: "comparator.json"
+    - declaration: "AugmentedDescartes.rigidMotionPoint_isometry"
+      file: "Solution.lean"
+      sorry_count: 0
+      axioms: ["propext", "Classical.choice", "Quot.sound"]
+      comparator_config: "comparator.json"
+    - declaration: "AugmentedDescartes.rigidMotionMatrix_sphereRow"
+      file: "Solution.lean"
+      sorry_count: 0
+      axioms: ["propext", "Classical.choice", "Quot.sound"]
+      comparator_config: "comparator.json"
+    - declaration: "AugmentedDescartes.rigidMotionMatrix_planeRow"
+      file: "Solution.lean"
+      sorry_count: 0
+      axioms: ["propext", "Classical.choice", "Quot.sound"]
+      comparator_config: "comparator.json"
+    - declaration: "AugmentedDescartes.same_curvature_congruence"
+      file: "Solution.lean"
+      sorry_count: 0
+      axioms: ["propext", "Classical.choice", "Quot.sound"]
+      comparator_config: "comparator.json"
+    - declaration: "AugmentedDescartes.rowPower_sphereRow"
+      file: "Solution.lean"
+      sorry_count: 0
+      axioms: ["propext", "Classical.choice", "Quot.sound"]
+      comparator_config: "comparator.json"
+    - declaration: "AugmentedDescartes.rowPower_planeRow"
+      file: "Solution.lean"
+      sorry_count: 0
+      axioms: ["propext", "Classical.choice", "Quot.sound"]
+      comparator_config: "comparator.json"
+    - declaration: "AugmentedDescartes.rowPower_sphereRow_neg_iff_of_pos"
+      file: "Solution.lean"
+      sorry_count: 0
+      axioms: ["propext", "Classical.choice", "Quot.sound"]
+      comparator_config: "comparator.json"
+    - declaration: "AugmentedDescartes.rowPower_sphereRow_neg_iff_of_neg"
+      file: "Solution.lean"
+      sorry_count: 0
+      axioms: ["propext", "Classical.choice", "Quot.sound"]
+      comparator_config: "comparator.json"
+    - declaration: "AugmentedDescartes.rowPower_planeRow_neg_iff"
+      file: "Solution.lean"
+      sorry_count: 0
+      axioms: ["propext", "Classical.choice", "Quot.sound"]
+      comparator_config: "comparator.json"
+    - declaration: "AugmentedDescartes.augmented_orientation"
+      file: "Solution.lean"
+      sorry_count: 0
+      axioms: ["propext", "Classical.choice", "Quot.sound"]
+      comparator_config: "comparator.json"
+    - declaration: "AugmentedDescartes.augmented_orientation_disjoint"
+      file: "Solution.lean"
+      sorry_count: 0
+      axioms: ["propext", "Classical.choice", "Quot.sound"]
+      comparator_config: "comparator.json"
+    - declaration: "AugmentedDescartes.augmented_no_three_zero_curvatures"
+      file: "Solution.lean"
+      sorry_count: 0
+      axioms: ["propext", "Classical.choice", "Quot.sound"]
+      comparator_config: "comparator.json"
+    - declaration: "AugmentedDescartes.augmented_no_three_boundaries"
+      file: "Solution.lean"
+      sorry_count: 0
+      axioms: ["propext", "Classical.choice", "Quot.sound"]
+      comparator_config: "comparator.json"
+    - declaration: "AugmentedDescartes.rigidMotionOf_isValid"
+      file: "Solution.lean"
+      sorry_count: 0
+      axioms: ["propext", "Classical.choice", "Quot.sound"]
+      comparator_config: "comparator.json"
+    - declaration: "AugmentedDescartes.rigidMotionOf_curvature"
+      file: "Solution.lean"
+      sorry_count: 0
+      axioms: ["propext", "Classical.choice", "Quot.sound"]
+      comparator_config: "comparator.json"
+    - declaration: "AugmentedDescartes.lorentz_vecMul_rigidMotionMatrix"
+      file: "Solution.lean"
+      sorry_count: 0
+      axioms: ["propext", "Classical.choice", "Quot.sound"]
+      comparator_config: "comparator.json"
+    - declaration: "AugmentedDescartes.rigidMotionOf_tangent_iff"
+      file: "Solution.lean"
+      sorry_count: 0
+      axioms: ["propext", "Classical.choice", "Quot.sound"]
+      comparator_config: "comparator.json"
+    - declaration: "AugmentedDescartes.congruent_iff_same_curvature"
+      file: "Solution.lean"
+      sorry_count: 0
+      axioms: ["propext", "Classical.choice", "Quot.sound"]
+      comparator_config: "comparator.json"
+    - declaration: "AugmentedDescartes.tangent_family_curvature_sum_ne_zero"
+      file: "Solution.lean"
+      sorry_count: 0
+      axioms: ["propext", "Classical.choice", "Quot.sound"]
+      comparator_config: "comparator.json"
+    - declaration: "AugmentedDescartes.tangent_family_interiors_disjoint"
+      file: "Solution.lean"
+      sorry_count: 0
+      axioms: ["propext", "Classical.choice", "Quot.sound"]
+      comparator_config: "comparator.json"
+    - declaration: "AugmentedDescartes.tangent_family_two_hyperplanes"
+      file: "Solution.lean"
+      sorry_count: 0
+      axioms: ["propext", "Classical.choice", "Quot.sound"]
+      comparator_config: "comparator.json"
 
 automation:
   methods:
@@ -533,15 +721,21 @@ automation:
         The project was directed by its author. Claude (Anthropic) in Claude Code was used throughout: the
         reading of the three papers as printed pages, the statements and their check against them, the exact
         replay of the identities in the standard library, the Lean proofs, the prior-art searches and the
-        repository text;
-        Claude Fable 5.1 pinned the statements, wrote the replay checker, merged the proof modules and wrote
-        the documents, and Claude Opus 5.5 subagents wrote the Lean proofs, one module each, checked the
-        statements against the printed pages and audited the proofs in separate passes. Lean v4.35.0-rc2 and
-        Mathlib v4.35.0-rc2 (commit 065356127b1dc0016f66b7283ce0ce2c4055aa55) are pinned by the committed
-        manifest and lake update is never run; there are no GitHub Actions workflows. There is no native_decide
-        and no decide +kernel: the proofs are matrix algebra over the reals (entrywise computations, the
-        explicit inverses, Matrix.mul_eq_one_comm_of_equiv for the swap of factors) and coordinate identities on
-        EuclideanSpace R (Fin n) closed by field_simp, ring and linear_combination.
+        repository text; Claude Fable 5.1 pinned the statements, wrote the replay checker, merged the proof
+        modules and wrote the documents, and Claude Opus 5.5 subagents wrote and adapted the Lean proofs,
+        checked the statements against the printed pages and audited the proofs in separate passes. Lean
+        v4.35.0-rc2 and Mathlib v4.35.0-rc2 (commit 065356127b1dc0016f66b7283ce0ce2c4055aa55) are pinned by the
+        committed manifest and lake update is never run; there are no GitHub Actions workflows. There is no
+        native_decide and no decide +kernel: the proofs are matrix algebra over the reals (entrywise
+        computations, the explicit inverses, Matrix.mul_eq_one_comm_of_equiv for the swap of factors) and
+        coordinate identities on EuclideanSpace R (Fin n) closed by field_simp, ring and linear_combination.
+    - method: "agent"
+      models: ["GPT (OpenAI)"]
+      framework: "ChatGPT"
+      tool_setup: >-
+        A pre-submission consult on the tree at c9277f7 (2026-10-10). Its proposals, the congruence and
+        orientation modules with their replay checks and the replay's Fraction constants, were checked here with
+        the full verification gate and adapted before adoption; the documentation is this repository's.
   spend_usd: "not tracked"
 
 fidelity:
@@ -553,18 +747,25 @@ fidelity:
     radius, the right a unit normal with an offset, with validity (radius nonzero; normal of norm 1) a
     separate predicate; the curvature of a hyperplane is 0. Tangency is the distance encoding of LMW's oriented
     tangency (two spheres dist^2 = (r + s)^2; a sphere and a hyperplane <h, x> - delta = -r; two hyperplanes
-    opposite normals), the pairwise form of LMW's oriented tangency (GLMWY III arXiv v2, Definition 2.1); the
-    disjoint-interiors property of an oriented Descartes configuration (LMW's compatibility of orientations
-    for a whole configuration) is not formalized, and the converses deliver tangency in the signed-distance
-    sense. The dimension is every n >= 1 (hypothesis 0 < n, needed for Q_n), where LMW's Section 3 assumes
+    opposite normals), the pairwise form of LMW's oriented tangency (GLMWY III arXiv v2, Lemma 2.5 (ii)), and the converses deliver
+    tangency in this sense. LMW's compatibility of orientations for a whole configuration is proved separately,
+    for the rows of any solution: with B the total curvature, nonzero, the sets {y : B F_i(y) < 0} are pairwise
+    disjoint, F_i the power polynomial of row i, whose negative set is the open ball, the open exterior (negative
+    radius) or the open half-space the normal points to; for B < 0 these are the interiors of the reversed rows,
+    and for a valid, pairwise tangent family with B > 0 the open interiors themselves are pairwise disjoint.
+    LMW's distinct tangencies appear as: no three boundaries share a finite point, at most two rows are
+    hyperplanes; there is no compactification, and tangency at infinity is the convention of opposite normals.
+    The dimension is every n >= 1 (hypothesis 0 < n, needed for Q_n), where LMW's Section 3 assumes
     n >= 2 and their Section 8 states the identity on the line, (8.4), with the same target under its own
     convention for the infinite interval; the hyperplanes of n = 1 here are oriented points, tangent when
     their normals are opposite, which that section does not treat; the Apollonian statements assume n >= 2,
     apollonianGen_mul_apply being false at n = 1 where Lean's 2/0 = 0 makes S_k the identity. The
     converse of Theorem 3.2 carries the hypothesis that the first column of M is nonzero, which LMW's printed
     statement omits, which GLMWY I's Theorem 3.1 carries at n = 2, and which
-    curvature_center_converse_needs_nonzero shows is needed. The converse of Theorem 3.1 is formalized in its
-    existence half only; the congruence half is not. The Mathlib statements use
+    curvature_center_converse_needs_nonzero shows is needed. Both halves of Theorem 3.1 are formalized, the congruence half for families labelled alike, with the motion
+    x -> x O + t in row-vector convention, O orthogonal (reflections included) and unique, and congruence
+    equivalent to equal curvature vectors since a motion preserves validity, curvature and tangency. The Mathlib
+    statements use
     EuclideanGeometry.Sphere.IsExtTangent and IsIntTangent with positive radii, the enclosing sphere's curvature
     written -1/r_e; sphere_soddy_gosset and sphere_augmented_descartes have no instance at n = 1 (three
     pairwise externally tangent intervals force a zero radius). Gosset is spelled as the mathematician spelled
@@ -577,18 +778,20 @@ review:
     and audited them in separate passes, the statements were checked against the printed pages of the three
     papers, the identities are replayed by scripts/check_descartes.py in the standard library, and VERIFICATION.md
     states what is checked and what is not. Mechanical correctness and agreement of formal statements do not
-    establish priority or significance: the augmented theorem, its converse, the Soddy-Gosset and
-    curvature-centre theorems and the complex Descartes theorem are LMW's, and the proof route is their
+    establish significance: the augmented theorem, its converse, the Soddy-Gosset and curvature-centre theorems
+    and the complex Descartes theorem are LMW's, the compatible orientations are part of their converse of
+    Theorem 3.3 (a solution is an oriented Descartes configuration), and the proof route of the identity is their
     Section 4 argument in Euclidean coordinates; the converses of Theorems 3.1 and 3.2 are stated by LMW, who
-    refer to Graham-Lagarias-Mallows-Wilks-Yan III for proofs, and the n = 2 converse of Theorem 3.2 with its
-    hypothesis is GLMWY I's Theorem 3.1; the Apollonian generators, the existence of a configuration and
-    det Q_n are in GLMWY III, and the two-spheres count in LMW's footnote 3. No earlier kernel check of any of
-    these statements beyond ATLAS's planar relation was found by the dated searches (Palomar's feed and day
-    index, ATLAS, Mathlib and its 1000.yaml, formal-conjectures, openai/math, LeanPool, anthropics/formal-math,
-    the Isabelle AFP, GitHub code search in Lean, Isabelle and Coq and the arXiv listing on 2026-10-09,
-    2026-10-10 and 2026-10-11 UTC; Rocq's opam index and HOL Light on 2026-10-09 and 2026-10-10); no first is
-    claimed beyond them.
-
+    refer to Graham-Lagarias-Mallows-Wilks-Yan III for proofs (whose arXiv versions 1-2 prove both halves of the
+    former as Theorem 2.2), and the n = 2 converse of Theorem 3.2 with its hypothesis is GLMWY I's Theorem 3.1;
+    the Apollonian generators, the existence of a configuration, det Q_n and the action of Euclidean motions on
+    augmented coordinates are in GLMWY III, and the two-spheres count in LMW's footnote 3. No earlier kernel
+    check of any of these statements beyond ATLAS's planar relation was found by the dated searches (Palomar's
+    feed and day index, ATLAS, Mathlib and its 1000.yaml, formal-conjectures, openai/math, LeanPool,
+    anthropics/formal-math, the Isabelle AFP, GitHub code search in Lean, Isabelle and Coq and the arXiv listing
+    on 2026-10-09, 2026-10-10 and 2026-10-11 UTC; Rocq's opam index and HOL Light on 2026-10-09 and
+    2026-10-10); rjwalters/lean-genius and carlok/LeanFrontier hold the planar relation as a definition with its
+    roots, reflections and parity, and one Ford-circle instance, with no derivation from tangency.
 
 alignment:
   namespace: "AugmentedDescartes"
@@ -657,7 +860,7 @@ alignment:
       lean: "AugmentedDescartes.augmented_descartes_converse"
       module: "Solution"
       status: "proved"
-      note: "The converse of LMW Theorem 3.3 (spheres and hyperplanes): every real solution is the augmented matrix of exactly one family of valid, pairwise tangent oriented spheres and hyperplanes (tangency in the signed-distance sense; disjoint interiors not asserted)."
+      note: "The converse of LMW Theorem 3.3 (spheres and hyperplanes): every real solution is the augmented matrix of exactly one family of valid, pairwise tangent oriented spheres and hyperplanes (tangency in the signed-distance sense; compatible orientations in augmented_orientation)."
     - source: "LMW Theorem 3.3, the converse, for a solution whose second column has no zero"
       lean: "AugmentedDescartes.augmented_descartes_converse_spheres"
       module: "Solution"
@@ -732,7 +935,7 @@ alignment:
       lean: "AugmentedDescartes.converse_soddy_gosset"
       module: "Solution"
       status: "proved"
-      note: "The existence half of the converse of the Soddy–Gosset theorem (LMW Theorem 3.1, which LMW state with \"We do not know an easy proof of this result; a proof appears in [16]\"; GLMWY III's arXiv versions 1–2 prove it as their Theorem 2.2 by the same route): every nonzero `b` with `(Σ bᵢ)² = n Σ bᵢ²` is the curvature vector of a pairwise tangent family of valid oriented spheres (`bᵢ ≠ 0`) and hyperplanes (`bᵢ = 0`), tangency in the signed-distance sense; the congruence half is not formalized."
+      note: "The existence half of the converse of the Soddy–Gosset theorem (LMW Theorem 3.1, which LMW state with \"We do not know an easy proof of this result; a proof appears in [16]\"; GLMWY III's arXiv versions 1–2 prove it as their Theorem 2.2 by the same route): every nonzero `b` with `(Σ bᵢ)² = n Σ bᵢ²` is the curvature vector of a pairwise tangent family of valid oriented spheres (`bᵢ ≠ 0`) and hyperplanes (`bᵢ = 0`), tangency in the signed-distance sense; the congruence half is same_curvature_congruence."
     - source: "LMW Theorem 3.1, the existence half of the converse, for a curvature vector with no zero entry (GLMWY III arXiv v1-v2, Theorem 2.2 (i))"
       lean: "AugmentedDescartes.converse_soddy_gosset_spheres"
       module: "Solution"
@@ -772,4 +975,119 @@ alignment:
       lean: "AugmentedDescartes.two_tangent_spheres"
       module: "Solution"
       status: "proved"
-      note: "Soddy's two spheres, geometrically (the signed count; LMW's footnote 3 counts the real spheres tangent to any `n + 1` mutually tangent spheres with distinct tangencies): given `n + 1` members of a configuration, exactly two valid oriented spheres or hyperplanes are tangent to all of them in the signed sense, the missing member and one other, and their curvatures sum to `(2/(n−1)) Σ` of the others' curvatures."
+      note: "Soddy's two spheres, geometrically (the signed count; LMW's footnote 3: the real circles tangent to each of `n + 1` mutually tangent real circles 'with distinct tangents' number exactly two): given `n + 1` members of a configuration, exactly two valid oriented spheres or hyperplanes are tangent to all of them in the signed sense, the missing member and one other, and their curvatures sum to `(2/(n−1)) Σ` of the others' curvatures."
+    - source: "LMW Theorem 3.1, the congruence half (arXiv v1 p. 7); GLMWY III arXiv v1-v2 Theorem 2.2 (ii); in matrix form: W₁⁻¹ W₂, which preserves the target form and fixes the curvature coordinate, is rigidMotionMatrix O t for a unique orthogonal O and translation t (derived here; GLMWY III Theorem 3.2 (3), p. 9, has the unique element of Aut(Q_W,n) between two solutions)"
+      lean: "AugmentedDescartes.same_curvature_motion"
+      module: "Solution"
+      status: "proved"
+      note: "The congruence half of the converse of the Soddy–Gosset theorem in matrix form: two solutions of the identity with the same curvature column satisfy `W₁ * rigidMotionMatrix O t = W₂` for exactly one pair `(O, t)` with `Oᵀ O = 1`, hyperplanes included."
+    - source: "Derived here, from the inverse of an augmented solution (W⁻¹ = ½ G Wᵀ Qₙ, read from the identity as in the proof of LMW Lemma 4.4)"
+      lean: "AugmentedDescartes.rigidMotion_parameters"
+      module: "Solution"
+      status: "proved"
+      note: "With `W₁ = [a | b | X]`, `W₂ = [a' | b | X']` and `W₁ * rigidMotionMatrix O t = W₂`: `O = ½ Xᵀ Qₙ X'` and `t = −¼ aᵀ Qₙ X'` (row-vector convention; no hypothesis on `O` or on `W₂`)."
+    - source: "Elementary Euclidean geometry (an orthogonal map followed by a translation is an isometry); no source theorem"
+      lean: "AugmentedDescartes.rigidMotionPoint_isometry"
+      module: "Solution"
+      status: "proved"
+      note: "For `Oᵀ O = 1` the point map `x ↦ x O + t` is an isometry."
+    - source: "GLMWY III, Theorem 9.1 (p. 31) and its proof (pp. 31-33): the right actions of a translation and of a rotation on the coordinates (b̄, b, w) of LMW (3.8), composed here for x ↦ x O + t; GLMWY III arXiv v1-v2 Theorem 3.1 in the column order (b, bx, b̄)"
+      lean: "AugmentedDescartes.rigidMotionMatrix_sphereRow"
+      module: "Solution"
+      status: "proved"
+      note: "On a sphere row the matrix acts as the motion: centre `x ↦ x O + t`, signed radius fixed (`Oᵀ O = 1`; at `r = 0` both sides are the zero row)."
+    - source: "GLMWY III, Theorem 9.1 (p. 31) and its proof (pp. 31-33): the hyperplane coordinates (2m, 0, h) of (9.5) and the translation and rotation actions on them; LMW (3.9)"
+      lean: "AugmentedDescartes.rigidMotionMatrix_planeRow"
+      module: "Solution"
+      status: "proved"
+      note: "On a hyperplane row the matrix multiplies the normal by `O` and moves the offset: `h ↦ h O`, `δ ↦ δ + (h O) ⬝ᵥ t`, with no hypothesis on `O`."
+    - source: "LMW Theorem 3.1, the congruence half ('there is a Euclidean motion taking one to the other', reflections included; arXiv v1 p. 7); GLMWY III arXiv v1-v2 Theorem 2.2 (ii); here with the motion unique for families labelled alike, proved by computing that a matrix preserving the target form and fixing the curvature column is a motion matrix, rather than by GLMWY III arXiv v1-v2's simplex-of-centres route (pp. 12-14)"
+      lean: "AugmentedDescartes.same_curvature_congruence"
+      module: "Solution"
+      status: "proved"
+      note: "Two valid, pairwise tangent families with the same curvatures, index by index, are carried one to the other by exactly one Euclidean motion `x ↦ x O + t`, `Oᵀ O = 1` (reflections and hyperplanes included; tangency in the signed-distance sense)."
+    - source: "Derived here: the power of a point divided by the signed radius; its zero set is the sphere equation of GLMWY III (9.3) multiplied by r"
+      lean: "AugmentedDescartes.rowPower_sphereRow"
+      module: "Solution"
+      status: "proved"
+      note: "The power polynomial of a sphere row is `(dist(y, x)² − r²)/r`."
+    - source: "Derived here from the hyperplane row (2δ, 0, h) of LMW (3.9) and GLMWY III (9.4)-(9.5)"
+      lean: "AugmentedDescartes.rowPower_planeRow"
+      module: "Solution"
+      status: "proved"
+      note: "The power polynomial of a hyperplane row is `2(δ − ⟪h, y⟫)`."
+    - source: "LMW's interior convention (arXiv v1 p. 2; GLMWY III p. 5): an oriented sphere of positive radius has the ball as its interior"
+      lean: "AugmentedDescartes.rowPower_sphereRow_neg_iff_of_pos"
+      module: "Solution"
+      status: "proved"
+      note: "For `r > 0` the power is negative exactly on the open ball `dist(y, x) < r`."
+    - source: "LMW's interior convention (arXiv v1 p. 2; GLMWY III p. 5): an oriented sphere of negative radius has the exterior as its interior"
+      lean: "AugmentedDescartes.rowPower_sphereRow_neg_iff_of_neg"
+      module: "Solution"
+      status: "proved"
+      note: "For `r < 0` the power is negative exactly on the open exterior `−r < dist(y, x)`."
+    - source: "GLMWY III (9.5) (the normal h points inward) and p. 7 (a hyperplane as the limit of spheres centred along h): the interior is the open half-space into which h points"
+      lean: "AugmentedDescartes.rowPower_planeRow_neg_iff"
+      module: "Solution"
+      status: "proved"
+      note: "The power of a hyperplane row is negative exactly on the open half-space `δ < ⟪h, y⟫` into which `h` points."
+    - source: "LMW §3's definition (arXiv v1 p. 7: interiors disjoint with the given orientations or with all reversed), as delivered by the converse of LMW Theorem 3.3; the orientation by the sign of the curvature sum, which cannot be zero (GLMWY III p. 6); derived here for every real solution by the power polynomial"
+      lean: "AugmentedDescartes.augmented_orientation"
+      module: "Solution"
+      status: "proved"
+      note: "For a solution of the identity the total curvature `B` is nonzero and no point `y` has `B Fᵢ(y) < 0` and `B Fⱼ(y) < 0` for two rows `i ≠ j`."
+    - source: "As for augmented_orientation, stated as disjoint subsets of ℝⁿ (LMW arXiv v1 p. 7; GLMWY III p. 6); derived here"
+      lean: "AugmentedDescartes.augmented_orientation_disjoint"
+      module: "Solution"
+      status: "proved"
+      note: "`{y | B Fᵢ(y) < 0}` and `{y | B Fⱼ(y) < 0}` are disjoint for `i ≠ j`."
+    - source: "GLMWY III p. 6 (the four sign patterns of the positively oriented case: at most two zero curvatures); LMW arXiv v1 p. 7 lists them after Theorem 3.1 under the printed hypothesis 'If all b_i are non-zero'; here for every real solution, by Cauchy-Schwarz"
+      lean: "AugmentedDescartes.augmented_no_three_zero_curvatures"
+      module: "Solution"
+      status: "proved"
+      note: "At most two rows of a solution of the identity have zero curvature, the hyperplane rows."
+    - source: "The distinct-tangency clause of a Descartes configuration (LMW arXiv v1 pp. 1, 2-3 and 7; GLMWY III p. 5, 'all points of tangency distinct'), at finite points, derived here for every real solution from the power polynomial"
+      lean: "AugmentedDescartes.augmented_no_three_boundaries"
+      module: "Solution"
+      status: "proved"
+      note: "No three rows of a solution of the identity have power `0` at one point `y` of `ℝⁿ`: no three boundaries share a finite point."
+    - source: "Derived here (an orthogonal map keeps unit normals unit; signed radii are untouched)"
+      lean: "AugmentedDescartes.rigidMotionOf_isValid"
+      module: "Solution"
+      status: "proved"
+      note: "A Euclidean motion (`Oᵀ O = 1`) preserves validity."
+    - source: "Derived here (the motion keeps signed radii)"
+      lean: "AugmentedDescartes.rigidMotionOf_curvature"
+      module: "Solution"
+      status: "proved"
+      note: "A Euclidean motion preserves the signed curvature."
+    - source: "Derived here: the motion matrix lies in the group of the target form, so it preserves the Lorentz pairing (GLMWY III Theorem 3.2 and §9: Euclidean motions act on augmented coordinates inside Aut(Q_W,n))"
+      lean: "AugmentedDescartes.lorentz_vecMul_rigidMotionMatrix"
+      module: "Solution"
+      status: "proved"
+      note: "For `Oᵀ O = 1` the motion matrix preserves the Lorentz pairing of rows."
+    - source: "Derived here from the encoding of tangency as a Lorentz pairing of −1 (row 6) and the invariance of the pairing"
+      lean: "AugmentedDescartes.rigidMotionOf_tangent_iff"
+      module: "Solution"
+      status: "proved"
+      note: "A Euclidean motion preserves tangency of valid objects."
+    - source: "LMW Theorem 3.1, the congruence half, as an equivalence (that congruent families have the same curvatures is immediate, the motion keeping signed radii); GLMWY III arXiv v1-v2 Theorem 2.2 (ii)"
+      lean: "AugmentedDescartes.congruent_iff_same_curvature"
+      module: "Solution"
+      status: "proved"
+      note: "Two valid, pairwise tangent families are carried one to the other by a Euclidean motion exactly when their curvatures agree index by index."
+    - source: "GLMWY III p. 6 ('the sum of the curvatures cannot be zero'), here for every valid, pairwise tangent family"
+      lean: "AugmentedDescartes.tangent_family_curvature_sum_ne_zero"
+      module: "Solution"
+      status: "proved"
+      note: "The total curvature of a valid, pairwise tangent family is nonzero."
+    - source: "LMW §3's definition of an oriented Descartes configuration (arXiv v1 p. 7: interiors disjoint with the given orientations or with all reversed); the positive orientation is the one with positive curvature sum (GLMWY III p. 6); here for every valid, pairwise tangent family"
+      lean: "AugmentedDescartes.tangent_family_interiors_disjoint"
+      module: "Solution"
+      status: "proved"
+      note: "A valid, pairwise tangent family with positive total curvature has pairwise disjoint open interiors `{y | rowPower (row (s i)) y < 0}`."
+    - source: "GLMWY III p. 6 (at most two zero curvatures in the positively oriented case), here for every valid, pairwise tangent family"
+      lean: "AugmentedDescartes.tangent_family_two_hyperplanes"
+      module: "Solution"
+      status: "proved"
+      note: "At most two members of a valid, pairwise tangent family are hyperplanes."

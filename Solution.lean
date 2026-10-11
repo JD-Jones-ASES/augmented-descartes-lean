@@ -220,4 +220,160 @@ theorem two_tangent_spheres {n : ℕ} (hn : 2 ≤ n) (s : Fin (n + 2) → Orient
         u = s k ∨ u = t :=
   two_tangent_spheres_internal hn s hv ht k
 
+theorem same_curvature_motion {n : ℕ}
+    (W₁ W₂ : Matrix (Fin (n + 2)) (Fin 2 ⊕ Fin n) ℝ)
+    (hW₁ : W₁ᵀ * descartesQ n * W₁ = augmentedTarget n)
+    (hW₂ : W₂ᵀ * descartesQ n * W₂ = augmentedTarget n)
+    (hb : ∀ i, W₁ i (Sum.inl 1) = W₂ i (Sum.inl 1)) :
+    ∃! p : Matrix (Fin n) (Fin n) ℝ × (Fin n → ℝ),
+      p.1ᵀ * p.1 = 1 ∧ W₁ * rigidMotionMatrix p.1 p.2 = W₂ :=
+  same_curvature_motion_internal W₁ W₂ hW₁ hW₂ hb
+
+theorem rigidMotion_parameters {n : ℕ}
+    (W₁ W₂ : Matrix (Fin (n + 2)) (Fin 2 ⊕ Fin n) ℝ)
+    (hW₁ : W₁ᵀ * descartesQ n * W₁ = augmentedTarget n)
+    (O : Matrix (Fin n) (Fin n) ℝ) (t : Fin n → ℝ)
+    (h : W₁ * rigidMotionMatrix O t = W₂) :
+    (∀ k l, O k l = (1 / 2 : ℝ) *
+      ((fun i => W₁ i (Sum.inr k)) ⬝ᵥ (descartesQ n *ᵥ (fun i => W₂ i (Sum.inr l))))) ∧
+    ∀ l, t l = (-1 / 4 : ℝ) *
+      ((fun i => W₁ i (Sum.inl 0)) ⬝ᵥ (descartesQ n *ᵥ (fun i => W₂ i (Sum.inr l)))) :=
+  rigidMotion_parameters_internal W₁ W₂ hW₁ O t h
+
+theorem rigidMotionPoint_isometry {n : ℕ} (O : Matrix (Fin n) (Fin n) ℝ)
+    (hO : Oᵀ * O = 1) (t : Fin n → ℝ) : Isometry (rigidMotionPoint O t) :=
+  rigidMotionPoint_isometry_internal O hO t
+
+theorem rigidMotionMatrix_sphereRow {n : ℕ} (O : Matrix (Fin n) (Fin n) ℝ)
+    (hO : Oᵀ * O = 1) (t : Fin n → ℝ) (x : EuclideanSpace ℝ (Fin n)) (r : ℝ) :
+    sphereRow x r ᵥ* rigidMotionMatrix O t = sphereRow (rigidMotionPoint O t x) r :=
+  rigidMotionMatrix_sphereRow_internal O hO t x r
+
+theorem rigidMotionMatrix_planeRow {n : ℕ} (O : Matrix (Fin n) (Fin n) ℝ)
+    (t : Fin n → ℝ) (h : EuclideanSpace ℝ (Fin n)) (δ : ℝ) :
+    planeRow h δ ᵥ* rigidMotionMatrix O t =
+      planeRow (rigidMotionPoint O 0 h) (δ + ((fun k => h k) ᵥ* O) ⬝ᵥ t) :=
+  rigidMotionMatrix_planeRow_internal O t h δ
+
+theorem same_curvature_congruence {n : ℕ} (hn : 0 < n)
+    (s s' : Fin (n + 2) → OrientedSphere n)
+    (hs : ∀ i, OrientedSphere.IsValid (s i))
+    (hs' : ∀ i, OrientedSphere.IsValid (s' i))
+    (ht : ∀ i j, i ≠ j → OrientedSphere.Tangent (s i) (s j))
+    (ht' : ∀ i j, i ≠ j → OrientedSphere.Tangent (s' i) (s' j))
+    (hb : ∀ i, OrientedSphere.curvature (s i) = OrientedSphere.curvature (s' i)) :
+    ∃! p : Matrix (Fin n) (Fin n) ℝ × (Fin n → ℝ),
+      p.1ᵀ * p.1 = 1 ∧ ∀ i, rigidMotionOf p.1 p.2 (s i) = s' i :=
+  same_curvature_congruence_internal hn s s' hs hs' ht ht' hb
+
+theorem rowPower_sphereRow {n : ℕ} (x y : EuclideanSpace ℝ (Fin n))
+    (r : ℝ) (hr : r ≠ 0) :
+    rowPower (sphereRow x r) y = (dist y x ^ 2 - r ^ 2) / r :=
+  rowPower_sphereRow_internal x y r hr
+
+theorem rowPower_planeRow {n : ℕ} (h y : EuclideanSpace ℝ (Fin n))
+    (δ : ℝ) : rowPower (planeRow h δ) y = 2 * (δ - inner ℝ h y) :=
+  rowPower_planeRow_internal h y δ
+
+theorem rowPower_sphereRow_neg_iff_of_pos {n : ℕ}
+    (x y : EuclideanSpace ℝ (Fin n)) (r : ℝ) (hr : 0 < r) :
+    rowPower (sphereRow x r) y < 0 ↔ dist y x < r :=
+  rowPower_sphereRow_neg_iff_of_pos_internal x y r hr
+
+theorem rowPower_sphereRow_neg_iff_of_neg {n : ℕ}
+    (x y : EuclideanSpace ℝ (Fin n)) (r : ℝ) (hr : r < 0) :
+    rowPower (sphereRow x r) y < 0 ↔ -r < dist y x :=
+  rowPower_sphereRow_neg_iff_of_neg_internal x y r hr
+
+theorem rowPower_planeRow_neg_iff {n : ℕ}
+    (h y : EuclideanSpace ℝ (Fin n)) (δ : ℝ) :
+    rowPower (planeRow h δ) y < 0 ↔ δ < inner ℝ h y :=
+  rowPower_planeRow_neg_iff_internal h y δ
+
+theorem augmented_orientation {n : ℕ} (hn : 0 < n)
+    (W : Matrix (Fin (n + 2)) (Fin 2 ⊕ Fin n) ℝ)
+    (hW : Wᵀ * descartesQ n * W = augmentedTarget n) :
+    (∑ k, W k (Sum.inl 1)) ≠ 0 ∧
+      ∀ (i j : Fin (n + 2)), i ≠ j → ∀ y : EuclideanSpace ℝ (Fin n),
+        ¬ ((∑ k, W k (Sum.inl 1)) * rowPower (W i) y < 0 ∧
+          (∑ k, W k (Sum.inl 1)) * rowPower (W j) y < 0) :=
+  augmented_orientation_internal hn W hW
+
+theorem augmented_orientation_disjoint {n : ℕ} (hn : 0 < n)
+    (W : Matrix (Fin (n + 2)) (Fin 2 ⊕ Fin n) ℝ)
+    (hW : Wᵀ * descartesQ n * W = augmentedTarget n)
+    (i j : Fin (n + 2)) (hij : i ≠ j) :
+    Disjoint {y : EuclideanSpace ℝ (Fin n) |
+      (∑ k, W k (Sum.inl 1)) * rowPower (W i) y < 0}
+      {y : EuclideanSpace ℝ (Fin n) |
+        (∑ k, W k (Sum.inl 1)) * rowPower (W j) y < 0} :=
+  augmented_orientation_disjoint_internal hn W hW i j hij
+
+theorem augmented_no_three_zero_curvatures {n : ℕ} (hn : 0 < n)
+    (W : Matrix (Fin (n + 2)) (Fin 2 ⊕ Fin n) ℝ)
+    (hW : Wᵀ * descartesQ n * W = augmentedTarget n)
+    (i j k : Fin (n + 2)) (hij : i ≠ j) (hik : i ≠ k) (hjk : j ≠ k) :
+    ¬ (W i (Sum.inl 1) = 0 ∧ W j (Sum.inl 1) = 0 ∧ W k (Sum.inl 1) = 0) :=
+  augmented_no_three_zero_curvatures_internal hn W hW i j k hij hik hjk
+
+theorem augmented_no_three_boundaries {n : ℕ} (hn : 0 < n)
+    (W : Matrix (Fin (n + 2)) (Fin 2 ⊕ Fin n) ℝ)
+    (hW : Wᵀ * descartesQ n * W = augmentedTarget n)
+    (i j k : Fin (n + 2)) (hij : i ≠ j) (hik : i ≠ k) (hjk : j ≠ k)
+    (y : EuclideanSpace ℝ (Fin n)) :
+    ¬ (rowPower (W i) y = 0 ∧ rowPower (W j) y = 0 ∧ rowPower (W k) y = 0) :=
+  augmented_no_three_boundaries_internal hn W hW i j k hij hik hjk y
+
+theorem rigidMotionOf_isValid {n : ℕ} (O : Matrix (Fin n) (Fin n) ℝ) (hO : Oᵀ * O = 1)
+    (t : Fin n → ℝ) (s : OrientedSphere n) (hs : OrientedSphere.IsValid s) :
+    OrientedSphere.IsValid (rigidMotionOf O t s) :=
+  rigidMotionOf_isValid_internal O hO t s hs
+
+theorem rigidMotionOf_curvature {n : ℕ} (O : Matrix (Fin n) (Fin n) ℝ) (t : Fin n → ℝ)
+    (s : OrientedSphere n) :
+    OrientedSphere.curvature (rigidMotionOf O t s) = OrientedSphere.curvature s :=
+  rigidMotionOf_curvature_internal O t s
+
+theorem lorentz_vecMul_rigidMotionMatrix {n : ℕ} (O : Matrix (Fin n) (Fin n) ℝ)
+    (hO : Oᵀ * O = 1) (t : Fin n → ℝ) (w w' : Fin 2 ⊕ Fin n → ℝ) :
+    lorentz (w ᵥ* rigidMotionMatrix O t) (w' ᵥ* rigidMotionMatrix O t) = lorentz w w' :=
+  lorentz_vecMul_rigidMotionMatrix_internal O hO t w w'
+
+theorem rigidMotionOf_tangent_iff {n : ℕ} (O : Matrix (Fin n) (Fin n) ℝ) (hO : Oᵀ * O = 1)
+    (t : Fin n → ℝ) (s u : OrientedSphere n) (hs : OrientedSphere.IsValid s)
+    (hu : OrientedSphere.IsValid u) :
+    OrientedSphere.Tangent (rigidMotionOf O t s) (rigidMotionOf O t u) ↔ OrientedSphere.Tangent s u :=
+  rigidMotionOf_tangent_iff_internal O hO t s u hs hu
+
+theorem congruent_iff_same_curvature {n : ℕ} (hn : 0 < n)
+    (s s' : Fin (n + 2) → OrientedSphere n)
+    (hs : ∀ i, OrientedSphere.IsValid (s i)) (hs' : ∀ i, OrientedSphere.IsValid (s' i))
+    (ht : ∀ i j, i ≠ j → OrientedSphere.Tangent (s i) (s j))
+    (ht' : ∀ i j, i ≠ j → OrientedSphere.Tangent (s' i) (s' j)) :
+    (∃ O : Matrix (Fin n) (Fin n) ℝ, ∃ t : Fin n → ℝ, Oᵀ * O = 1 ∧ ∀ i, rigidMotionOf O t (s i) = s' i) ↔
+      ∀ i, OrientedSphere.curvature (s i) = OrientedSphere.curvature (s' i) :=
+  congruent_iff_same_curvature_internal hn s s' hs hs' ht ht'
+
+theorem tangent_family_curvature_sum_ne_zero {n : ℕ} (hn : 0 < n)
+    (s : Fin (n + 2) → OrientedSphere n) (hs : ∀ i, OrientedSphere.IsValid (s i))
+    (ht : ∀ i j, i ≠ j → OrientedSphere.Tangent (s i) (s j)) :
+    (∑ i, OrientedSphere.curvature (s i)) ≠ 0 :=
+  tangent_family_curvature_sum_ne_zero_internal hn s hs ht
+
+theorem tangent_family_interiors_disjoint {n : ℕ} (hn : 0 < n)
+    (s : Fin (n + 2) → OrientedSphere n) (hs : ∀ i, OrientedSphere.IsValid (s i))
+    (ht : ∀ i j, i ≠ j → OrientedSphere.Tangent (s i) (s j))
+    (hpos : 0 < ∑ i, OrientedSphere.curvature (s i)) (i j : Fin (n + 2)) (hij : i ≠ j) :
+    Disjoint {y : EuclideanSpace ℝ (Fin n) | rowPower (OrientedSphere.row (s i)) y < 0}
+      {y : EuclideanSpace ℝ (Fin n) | rowPower (OrientedSphere.row (s j)) y < 0} :=
+  tangent_family_interiors_disjoint_internal hn s hs ht hpos i j hij
+
+theorem tangent_family_two_hyperplanes {n : ℕ} (hn : 0 < n)
+    (s : Fin (n + 2) → OrientedSphere n) (hs : ∀ i, OrientedSphere.IsValid (s i))
+    (ht : ∀ i j, i ≠ j → OrientedSphere.Tangent (s i) (s j))
+    (i j k : Fin (n + 2)) (hij : i ≠ j) (hik : i ≠ k) (hjk : j ≠ k) :
+    ¬ (OrientedSphere.curvature (s i) = 0 ∧ OrientedSphere.curvature (s j) = 0 ∧
+      OrientedSphere.curvature (s k) = 0) :=
+  tangent_family_two_hyperplanes_internal hn s hs ht i j k hij hik hjk
+
 end AugmentedDescartes

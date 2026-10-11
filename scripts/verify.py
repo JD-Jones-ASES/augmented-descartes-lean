@@ -17,7 +17,7 @@ agree exactly as the registry's comparator demands, and Palomar's
 core-notation audit of the compared declarations. The compared definitions are read from
 Challenge.lean at run time: every `def`, `noncomputable def` and `abbrev` at the start of a line, in namespace
 AugmentedDescartes. `--fetch-cache` runs
-`lake exe cache get` first (network); `--skip-build` leaves out the four Lean steps. The last line
+`lake exe cache get` first (network); `--skip-build` leaves out the five Lean steps. The last line
 is `VERIFY: PASS` or `VERIFY: FAIL` for a full run, and `VERIFY (source/replay only): PASS` or
 `VERIFY (source/replay only): FAIL` when Lean checks were skipped. Exit status 0 on PASS only.
 """
@@ -100,6 +100,10 @@ def check_yaml():
         aligned = [a["lean"] for a in data.get("alignment", {}).get("statements", [])]
         if aligned != config["theorem_names"]:
             problems.append("alignment.statements differ from comparator.json theorem_names in order")
+        challenge_names = [f"{NAMESPACE}.{m}" for m in re.findall(
+            r"^theorem\s+([\w.']+)", (ROOT / "Challenge.lean").read_text(encoding="utf-8"), flags=re.M)]
+        if challenge_names != config["theorem_names"]:
+            problems.append("comparator.json theorem_names differ from Challenge.lean's theorems in order")
         statuses = {a.get("status") for a in data.get("alignment", {}).get("statements", [])}
         if statuses != {"proved"}:
             problems.append(f"alignment statuses other than proved: {sorted(statuses - {'proved'})}")
@@ -235,7 +239,7 @@ def main():
         ok &= check_theorem_elaboration()
         ok &= check_notation_audit(names)
     else:
-        print("[SKIP] Lean build and axiom audit; module resolution; definition elaboration; "
+        print("[SKIP] Lean build and axiom audit; module resolution; definition elaboration; theorem elaboration; "
               "core-notation audit", flush=True)
     scope = "VERIFY (source/replay only)" if skip_build else "VERIFY"
     print(f"{scope}: {'PASS' if ok else 'FAIL'}")

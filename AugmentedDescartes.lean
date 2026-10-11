@@ -10,3 +10,6 @@ public import AugmentedDescartes.Apollonian
 public import AugmentedDescartes.Base
 public import AugmentedDescartes.Transitivity
 public import AugmentedDescartes.Completion
+public import AugmentedDescartes.Rigidity
+public import AugmentedDescartes.Orientation
+public import AugmentedDescartes.Motion

@@ -32,8 +32,8 @@ run_cmd do
         unless allowed.contains ax do
           rejected := rejected + 1
           logError m!"Unexpected axiom dependency: {name} -> {ax}"
-  unless checked ≥ 220 do
-    logError m!"Axiom audit matched only {checked} project constants; expected at least 220"
+  unless checked ≥ 289 do
+    logError m!"Axiom audit matched only {checked} project constants; expected at least 289"
   for n in [`AugmentedDescartes.lorentz_sphereRow_self,
       `AugmentedDescartes.lorentz_sphereRow_eq_neg_one_iff,
       `AugmentedDescartes.lorentz_sphereRow_planeRow_eq_neg_one_iff,
@@ -59,7 +59,27 @@ run_cmd do
       `AugmentedDescartes.curvature_center_converse_needs_nonzero,
       `AugmentedDescartes.apollonianGen_mem_aut, `AugmentedDescartes.apollonian_reflection,
       `AugmentedDescartes.apollonianGen_mul_apply, `AugmentedDescartes.two_tangent_rows,
-      `AugmentedDescartes.two_tangent_spheres] do
+      `AugmentedDescartes.two_tangent_spheres, `AugmentedDescartes.same_curvature_motion,
+      `AugmentedDescartes.rigidMotion_parameters,
+      `AugmentedDescartes.rigidMotionPoint_isometry,
+      `AugmentedDescartes.rigidMotionMatrix_sphereRow,
+      `AugmentedDescartes.rigidMotionMatrix_planeRow,
+      `AugmentedDescartes.same_curvature_congruence, `AugmentedDescartes.rowPower_sphereRow,
+      `AugmentedDescartes.rowPower_planeRow,
+      `AugmentedDescartes.rowPower_sphereRow_neg_iff_of_pos,
+      `AugmentedDescartes.rowPower_sphereRow_neg_iff_of_neg,
+      `AugmentedDescartes.rowPower_planeRow_neg_iff, `AugmentedDescartes.augmented_orientation,
+      `AugmentedDescartes.augmented_orientation_disjoint,
+      `AugmentedDescartes.augmented_no_three_zero_curvatures,
+      `AugmentedDescartes.augmented_no_three_boundaries,
+      `AugmentedDescartes.rigidMotionOf_isValid,
+      `AugmentedDescartes.rigidMotionOf_curvature,
+      `AugmentedDescartes.lorentz_vecMul_rigidMotionMatrix,
+      `AugmentedDescartes.rigidMotionOf_tangent_iff,
+      `AugmentedDescartes.congruent_iff_same_curvature,
+      `AugmentedDescartes.tangent_family_curvature_sum_ne_zero,
+      `AugmentedDescartes.tangent_family_interiors_disjoint,
+      `AugmentedDescartes.tangent_family_two_hyperplanes] do
     unless env.contains n do
       logError m!"Compared theorem is missing from the environment: {n}"
   logInfo m!"Audited {checked} project constants; unexpected axiom dependencies: {rejected}."

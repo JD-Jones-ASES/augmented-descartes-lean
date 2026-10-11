@@ -182,8 +182,8 @@ theorem tr_exists_solution_of_isotropic {n : ℕ} (hn : 0 < n) (b : Fin (n + 2) 
 "We do not know an easy proof of this result; a proof appears in [16]"; GLMWY III's arXiv versions 1–2 prove
 it as their Theorem 2.2 by the same route): every nonzero `b` with
 `(Σ bᵢ)² = n Σ bᵢ²` is the curvature vector of a pairwise tangent family of valid oriented spheres
-(`bᵢ ≠ 0`) and hyperplanes (`bᵢ = 0`), tangency in the signed-distance sense; the congruence half is not
-formalized. -/
+(`bᵢ ≠ 0`) and hyperplanes (`bᵢ = 0`), tangency in the signed-distance sense; the congruence half is
+`same_curvature_congruence`. -/
 theorem converse_soddy_gosset_internal {n : ℕ} (hn : 0 < n) (b : Fin (n + 2) → ℝ) (hb : b ≠ 0)
     (h : (∑ i, b i) ^ 2 = n * ∑ i, b i ^ 2) :
     ∃ s : Fin (n + 2) → OrientedSphere n, (∀ i, OrientedSphere.IsValid (s i)) ∧

@@ -112,4 +112,33 @@ noncomputable def apollonianGen (n : ℕ) (k : Fin (n + 2)) : Matrix (Fin (n + 2
   1 + (2 / ((n : ℝ) - 1)) • Matrix.vecMulVec (Pi.single k 1) (fun _ => 1) -
     (2 * n / ((n : ℝ) - 1)) • Matrix.vecMulVec (Pi.single k 1) (Pi.single k 1)
 
+/-- The augmented-coordinate matrix of the Euclidean motion `x ↦ x O + t`
+in row-vector convention. Its block form is
+`[[1, 0, 0], [t·t, 1, t], [2 O t, 0, O]]`.
+When `Oᵀ O = I`, this rotates or reflects and translates spheres and hyperplanes. -/
+noncomputable def rigidMotionMatrix {n : ℕ} (O : Matrix (Fin n) (Fin n) ℝ)
+    (t : Fin n → ℝ) : Matrix (Fin 2 ⊕ Fin n) (Fin 2 ⊕ Fin n) ℝ :=
+  Matrix.fromBlocks !![1, 0; t ⬝ᵥ t, 1]
+    (Matrix.of fun i k => ![0, t k] i) (Matrix.of fun k j => ![2 * (O *ᵥ t) k, 0] j) O
+
+/-- The Euclidean point map encoded by `rigidMotionMatrix`. -/
+noncomputable def rigidMotionPoint {n : ℕ} (O : Matrix (Fin n) (Fin n) ℝ)
+    (t : Fin n → ℝ) (x : EuclideanSpace ℝ (Fin n)) : EuclideanSpace ℝ (Fin n) :=
+  WithLp.toLp 2 ((fun k => x k) ᵥ* O + t)
+
+/-- The Euclidean action on oriented objects: the motion moves sphere centres and hyperplane normals, keeps
+signed radii, and shifts hyperplane offsets. -/
+noncomputable def rigidMotionOf {n : ℕ} (O : Matrix (Fin n) (Fin n) ℝ)
+    (t : Fin n → ℝ) : OrientedSphere n → OrientedSphere n :=
+  Sum.elim (fun p => Sum.inl (rigidMotionPoint O t p.1, p.2))
+    (fun p => Sum.inr (rigidMotionPoint O 0 p.1,
+      p.2 + ((fun k => p.1 k) ᵥ* O) ⬝ᵥ t))
+
+/-- The signed power polynomial of an augmented row. Its negative set is the oriented interior: a ball for a
+positive-radius sphere, an exterior for a negative-radius sphere, and the half-space into which the unit normal
+points for a hyperplane. -/
+noncomputable def rowPower {n : ℕ} (w : Fin 2 ⊕ Fin n → ℝ)
+    (y : EuclideanSpace ℝ (Fin n)) : ℝ :=
+  w (Sum.inl 1) * ‖y‖ ^ 2 - 2 * ∑ k, w (Sum.inr k) * y k + w (Sum.inl 0)
+
 end AugmentedDescartes

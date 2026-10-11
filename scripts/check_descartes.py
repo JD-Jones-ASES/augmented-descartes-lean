@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 """Standard-library replay of the identities behind the compared statements of Challenge.lean (the finder/checker
 split: the Lean development is the trust chain, this script the independent second implementation, exact
-arithmetic (fractions.Fraction) wherever the data are rational, floating point with a fixed seed where a square
-root enters: the base configuration is irrational by the determinant condition of GLMWY III, Lemmas 6.4-6.5).
+arithmetic (fractions.Fraction, and Q(sqrt 3) for the n = 3 cases) wherever the data allow it, floating point
+with a fixed seed elsewhere: det(W)^2 = n 2^(n+3), so no configuration has rational rows at n = 3..7).
 Prints one line per check and ends with VERDICT: PASS or VERDICT: FAIL; no check uses assert.
 
 Conventions (rows are augmented curvature-centre coordinates, LMW Def 3.2):
@@ -60,11 +60,13 @@ def target(n):
 
 def Gmat(n, exact=True):
     m = n + 2
+    zero = Fr(0) if exact else 0.0
+    one = Fr(1) if exact else 1.0
     half = Fr(1, 2) if exact else 0.5
-    G = mat(m, m, lambda i, j: 0)
+    G = mat(m, m, lambda i, j: zero)
     G[0][1] = G[1][0] = -half
     for k in range(2, m):
-        G[k][k] = 1
+        G[k][k] = one
     return G
 
 
@@ -150,6 +152,12 @@ def config_n1():
     return [sphere_row([Fr(1)], Fr(1)), sphere_row([Fr(3)], Fr(1)), sphere_row([Fr(2)], Fr(-2))]
 
 
+def config_n2_two_planes():
+    # Two unit circles at (0,0), (2,0), between the oriented lines y=1 and y=-1.
+    return [sphere_row([Fr(0), Fr(0)], Fr(1)), sphere_row([Fr(2), Fr(0)], Fr(1)),
+            plane_row([Fr(0), Fr(1)], Fr(1)), plane_row([Fr(0), Fr(-1)], Fr(1))]
+
+
 def check_exact_configs():
     for n, W in ((2, config_n2()), (1, config_n1())):
         ok, d = gram_holds(W)
@@ -225,15 +233,15 @@ def check_base_and_reflection():
             W2 = reflect_row(W1, n + 1, n)  # then the second
             ok1, _ = identity_holds(W1, n, exact=False)
             ok2, _ = identity_holds(W2, n, exact=False)
-            say(ok1 and ok2, f"H5 n={n}: both Apollonian reflections of W0 keep the identity")
+            say(ok1 and ok2, f"H5 n={n}: both Apollonian reflections of W0 keep the identity (float)")
             b = [w[1] for w in W2]
             want = [1.0] * n + [2.0 * n / (n - 1), 2.0 * n * (n + 1) / (n - 1) ** 2]
             say(max(abs(p - q) for p, q in zip(b, want)) < 1e-9 and all(abs(t) > 1e-9 for t in b),
-                f"H5 n={n}: curvatures (1,...,1, 2n/(n-1), 2n(n+1)/(n-1)^2), all nonzero")
+                f"H5 n={n}: curvatures (1,...,1, 2n/(n-1), 2n(n+1)/(n-1)^2), all nonzero (float)")
             dec = [decode_row(w, exact=False) for w in W2]
             say(all(dec[i][0] == "sphere" for i in range(n + 2)) and
                 all(geometric_tangent(dec[i], dec[j], exact=False) for i in range(n + 2) for j in range(n + 2) if i != j),
-                f"H5 n={n}: the decoded all-sphere family is pairwise tangent geometrically")
+                f"H5 n={n}: the decoded all-sphere family is pairwise tangent geometrically (float)")
             # the two-sphere theorem: along the line w_k + t (w_k' - w_k) the Lorentz norm is 1 only at t = 0, 1
             for k in (0, n):
                 Wr = reflect_row(W, k, n)
@@ -242,11 +250,11 @@ def check_base_and_reflection():
                 cross = lorentz(W[k], dvec)
                 # norm(t) = 1 + 2 t cross + t^2 dd ; roots t = 0 and t = -2 cross/dd, which must be 1
                 say(abs(dd) > 1e-9 and abs(-2 * cross / dd - 1.0) < 1e-9,
-                    f"H5 n={n} k={k}: the norm along the admissible line has exactly the roots t=0,1")
+                    f"H5 n={n} k={k}: the norm along the admissible line has exactly the roots t=0,1 (float)")
                 say(all(abs(lorentz(dvec, W[i])) < 1e-9 for i in range(n + 2) if i != k),
-                    f"H5 n={n} k={k}: the reflected row pairs to -1 with every other row")
+                    f"H5 n={n} k={k}: the reflected row pairs to -1 with every other row (float)")
             # the rows are a basis (det W != 0): the admissible set is exactly that line
-            say(abs(det_float(W)) > 1e-9, f"H5 n={n}: W0 invertible (det {det_float(W):.3e})")
+            say(abs(det_float(W)) > 1e-9, f"H5 n={n}: W0 invertible (det {det_float(W):.3e}) (float)")
 
 
 def det_float(A):
@@ -376,7 +384,7 @@ def check_converse_thm32():
             first = [w[0] for w in W]
             scale = max(1.0, max(abs(float(t)) for t in first)) ** 2
             ok = all((p == q) if exact else abs(p - q) < 1e-9 * scale for p, q in zip(bbar, first))
-            say(ok, f"H4 n={n} trial {trial}: the completion recovers the original bbar (uniqueness)")
+            say(ok, f"H4 n={n} trial {trial}: the completion of M recovers the original bbar column ({'exact' if exact else 'float'})")
     # the counterexample: M0 = [0 | e0 - e1 | e2 - e3] at n = 2 solves M^T Q M = diag(0,2,2) and completes to nothing
     n = 2
     M0 = [[Fr(0), Fr(1), Fr(0)], [Fr(0), Fr(-1), Fr(0)], [Fr(0), Fr(0), Fr(1)], [Fr(0), Fr(0), Fr(-1)]]
@@ -543,6 +551,512 @@ def det_exact(A):
     return sign * A[m - 1][m - 1]
 
 
+# ---------- rigid-motion reconstruction, independently from geometric data ----------
+def rows_of_objects(objects):
+    """Encode exact geometric objects, retaining Fraction entries even at zero curvature."""
+    return [[Fr(c) for c in (sphere_row(x, r) if kind == "sphere" else plane_row(x, r))]
+            for kind, x, r in objects]
+
+
+def transform_object(obj, O, t):
+    """Move geometric data directly: row vectors x -> x O + t, h -> h O."""
+    kind, x, r = obj
+    moved = [sum(x[j] * O[j][k] for j in range(len(t))) for k in range(len(t))]
+    if kind == "sphere":
+        return kind, [moved[k] + t[k] for k in range(len(t))], r
+    return kind, moved, r + sum(moved[k] * t[k] for k in range(len(t)))
+
+
+def rigid_motion_matrix(O, t):
+    """The expected augmented action, for row vectors (bbar, b, v)."""
+    n = len(t)
+    A = mat(n + 2, n + 2, lambda i, j: Fr(0))
+    A[0][0] = A[1][1] = Fr(1)
+    A[1][0] = sum(c * c for c in t)
+    for i in range(n):
+        A[1][i + 2] = t[i]
+        A[i + 2][0] = 2 * sum(O[i][j] * t[j] for j in range(n))
+        for j in range(n):
+            A[i + 2][j + 2] = O[i][j]
+    return A
+
+
+def reconstruct_motion(n, W, Wprime):
+    """Recover the action from two matrices without using the supplied motion parameters."""
+    Ghalf = [[g / 2 for g in row] for row in Gmat(n)]
+    Winv = matmul(matmul(Ghalf, transpose(W)), Qmat(n))
+    A = matmul(Winv, Wprime)
+    return A, [row[2:] for row in A[2:]], A[1][2:]
+
+
+def check_rigidity():
+    sphere1 = [decode_row(w) for w in config_n1()]
+    sphere2 = [decode_row(w) for w in config_n2()]
+    strip2 = [decode_row(w) for w in config_n2_two_planes()]
+    rotation = [[Fr(3, 5), Fr(-4, 5)], [Fr(4, 5), Fr(3, 5)]]
+    reflection = [[Fr(3, 5), Fr(4, 5)], [Fr(4, 5), Fr(-3, 5)]]
+    cases = [
+        ("n=1 translation", 1, sphere1, [[Fr(1)]], [Fr(5, 3)]),
+        ("n=1 reflection and translation", 1, sphere1, [[Fr(-1)]], [Fr(-7, 4)]),
+        ("n=2 sphere rotation and translation", 2, sphere2, rotation, [Fr(7, 3), Fr(-2, 5)]),
+        ("n=2 sphere reflection and translation", 2, sphere2, reflection, [Fr(-5, 7), Fr(11, 6)]),
+        ("n=2 two-plane rotation and translation", 2, strip2, rotation, [Fr(7, 3), Fr(-2, 5)]),
+        ("n=2 two-plane reflection and translation", 2, strip2, reflection, [Fr(-5, 7), Fr(11, 6)]),
+    ]
+    for label, n, objects, O, t in cases:
+        W = rows_of_objects(objects)
+        moved = [transform_object(obj, O, t) for obj in objects]
+        Wprime = rows_of_objects(moved)
+        A, recovered_O, recovered_t = reconstruct_motion(n, W, Wprime)
+        say(all(isinstance(c, Fr) for row in A for c in row),
+            f"rigidity {label}: reconstruction uses Fraction throughout")
+        say(identity_holds(W, n)[0] and identity_holds(Wprime, n)[0] and
+            all(geometric_tangent(moved[i], moved[j]) for i in range(n + 2)
+                for j in range(i + 1, n + 2)),
+            f"rigidity {label}: source and transformed augmented identities and tangency (exact)")
+        say([w[1] for w in W] == [w[1] for w in Wprime],
+            f"rigidity {label}: every labelled curvature is preserved (exact)")
+        say(A == rigid_motion_matrix(O, t) and matmul(W, A) == Wprime,
+            f"rigidity {label}: reconstructed W^-1 W' equals the expected block matrix (exact)")
+        say(recovered_O == O and recovered_t == t and
+            matmul(transpose(recovered_O), recovered_O) == ident(n) and
+            matmul(recovered_O, transpose(recovered_O)) == ident(n),
+            f"rigidity {label}: the reconstructed O and t equal the applied motion, and O is orthogonal (exact)")
+        decoded = [decode_row(w) for w in Wprime]
+        sphere_ok = True
+        plane_ok = True
+        has_plane = False
+        for i, (kind, x, r) in enumerate(objects):
+            recovered_spatial = [sum(x[j] * recovered_O[j][k] for j in range(n)) for k in range(n)]
+            if kind == "sphere":
+                expected_center = [recovered_spatial[k] + recovered_t[k] for k in range(n)]
+                sphere_ok &= decoded[i] == ("sphere", expected_center, r)
+            else:
+                has_plane = True
+                expected_offset = r + sum(recovered_spatial[k] * recovered_t[k] for k in range(n))
+                plane_ok &= (decoded[i] == ("plane", recovered_spatial, expected_offset) and
+                             sum(c * c for c in recovered_spatial) == 1)
+        say(sphere_ok, f"rigidity {label}: sphere centres and signed radii follow the reconstructed motion (exact)")
+        if has_plane:
+            say(plane_ok, f"rigidity {label}: unit normals and offsets follow the reconstructed motion (exact)")
+
+    # Keep both matrix identities true, but change a curvature by an Apollonian reflection.
+    W = rows_of_objects(sphere2)
+    Wprime = rows_of_objects([transform_object(obj, rotation, [Fr(7, 3), Fr(-2, 5)]) for obj in sphere2])
+    changed = reflect_row(Wprime, 0, 2)
+    A, O, t = reconstruct_motion(2, W, changed)
+    curvature_basis = [Fr(0), Fr(1), Fr(0), Fr(0)]
+    say(identity_holds(changed, 2)[0] and [w[1] for w in changed] != [w[1] for w in W] and
+        [row[1] for row in A] != curvature_basis and A != rigid_motion_matrix(O, t),
+        "rigidity control: a valid Apollonian replacement changes a curvature and is not a rigid motion (exact)")
+
+    # Keep all signed radii and row norms valid, but deform centres by a nonorthogonal map.
+    stretch = [[Fr(2), Fr(0)], [Fr(0), Fr(1)]]
+    stretched = rows_of_objects([transform_object(obj, stretch, [Fr(7, 3), Fr(-2, 5)]) for obj in sphere2])
+    A, O, _ = reconstruct_motion(2, W, stretched)
+    say([w[1] for w in stretched] == [w[1] for w in W] and O == stretch and
+        not identity_holds(stretched, 2)[0] and
+        matmul(matmul(transpose(A), target(2)), A) != target(2),
+        "rigidity control: a nonorthogonal stretch keeps every signed radius; its linear part is recovered, and the moved family fails the augmented identity in both forms (exact)")
+
+
+# ---------- normalized oriented interiors, checked against direct geometry ----------
+def reverse_object(obj):
+    """Reverse the sphere orientation, or both the plane normal and its signed offset."""
+    kind, x, r = obj
+    return (kind, x, -r) if kind == "sphere" else (kind, [-c for c in x], -r)
+
+
+def geometric_interior(obj, y):
+    """Direct ball/exterior/halfspace membership, independently of augmented rows."""
+    kind, x, r = obj
+    if kind == "sphere":
+        distance_squared = sum((a - b) ** 2 for a, b in zip(y, x))
+        return distance_squared < r * r if r > 0 else distance_squared > r * r
+    return sum(a * b for a, b in zip(x, y)) > r
+
+
+def row_power(w, y):
+    return w[1] * sum(c * c for c in y) - 2 * sum(a * b for a, b in zip(w[2:], y)) + w[0]
+
+
+def geometric_power(obj, y):
+    kind, x, r = obj
+    if kind == "sphere":
+        return (sum((a - b) ** 2 for a, b in zip(y, x)) - r * r) / r
+    return 2 * (r - sum(a * b for a, b in zip(x, y)))
+
+
+def check_orientation():
+    line_points = [[Fr(c, 2)] for c in (-2, 0, 1, 2, 3, 4, 5, 6, 7, 8, 10)]
+    axis = [Fr(-2), Fr(-1), Fr(-1, 2), Fr(0), Fr(1, 2), Fr(1), Fr(2)]
+    plane_points = [[x, y] for x in axis for y in axis] + [[Fr(0), Fr(2, 3)], [Fr(0), Fr(1, 3)]]
+    cases = [("n=1 spheres", 1, config_n1(), line_points),
+             ("n=2 spheres", 2, config_n2(), plane_points),
+             ("n=2 two planes", 2, config_n2_two_planes(), plane_points)]
+    for label, n, baseline, points in cases:
+        original = [decode_row(w) for w in baseline]
+        for sign in (1, -1):
+            objects = original if sign == 1 else [reverse_object(obj) for obj in original]
+            W = rows_of_objects(objects)
+            A = sum(w[0] for w in W)
+            B = sum(w[1] for w in W)
+            V = [sum(w[k + 2] for w in W) for k in range(n)]
+            normalized = objects if B > 0 else [reverse_object(obj) for obj in objects]
+            values = [[row_power(w, y) for w in W] for y in points]
+            prefix = f"orientation {label}, global sign {sign:+d}"
+            say(W == [[sign * c for c in w] for w in baseline] and identity_holds(W, n)[0] and B != 0,
+                f"{prefix}: the global sign gives the expected rows and preserves the identity (exact)")
+            say(A * B - sum(c * c for c in V) == n * (n + 2),
+                f"{prefix}: column-sum discriminant is n(n+2) (exact)")
+            say(all(all(isinstance(f, Fr) and f == geometric_power(obj, y) and
+                        (f < 0) == geometric_interior(obj, y)
+                        for f, obj in zip(F, objects)) for y, F in zip(points, values)),
+                f"{prefix}: polynomial values and negative sets equal geometric powers/interiors (exact)")
+            say(all(sum(F) ** 2 == n * sum(f * f for f in F) and qform(n, F, F) == 0 for F in values),
+                f"{prefix}: every sampled power vector is Descartes-null in both forms (exact)")
+            say(all(B * sum(F) == n * (n + 2) + sum((B * y[k] - V[k]) ** 2 for k in range(n)) and
+                    B * sum(F) > 0 for y, F in zip(points, values)),
+                f"{prefix}: positive power-sum identity is an exact sum of squares (exact)")
+            say(all(all((B * f < 0) == geometric_interior(obj, y) for f, obj in zip(F, normalized))
+                    for y, F in zip(points, values)) and
+                (sign == 1 or any(sum(geometric_interior(obj, y) for obj in objects) > 1 for y in points)),
+                f"{prefix}: total-curvature normalization matches the geometric orientation" +
+                (" (exact)" if sign == 1 else "; control: the reversed family's raw interiors overlap at a sample (exact)"))
+            say(all(sum(B * f < 0 for f in F) <= 1 and
+                    sum(geometric_interior(obj, y) for obj in normalized) <= 1
+                    for y, F in zip(points, values)),
+                f"{prefix}: no point lies in two normalized interiors on {len(points)} rational samples (exact)")
+            say(all(any(geometric_interior(obj, y) for y in points) and
+                    any(geometric_power(obj, y) == 0 for y in points) for obj in normalized),
+                f"{prefix}: samples include each object's interior and boundary")
+
+    # A tangent pair alone can have overlapping specified interiors; it is not a full configuration.
+    overlapping = [("sphere", [Fr(0), Fr(0)], Fr(2)), ("sphere", [Fr(1), Fr(0)], Fr(-1))]
+    W = rows_of_objects(overlapping)
+    y = [Fr(-1, 2), Fr(0)]
+    F = [row_power(w, y) for w in W]
+    say(geometric_tangent(*overlapping) and lorentz(*W) == -1 and
+        all(geometric_interior(obj, y) for obj in overlapping) and all(f < 0 for f in F),
+        "orientation H2 control: a tangent pair has overlapping specified interiors, detected by both powers (exact)")
+    A, B = sum(w[0] for w in W), sum(w[1] for w in W)
+    V = [sum(w[k + 2] for w in W) for k in range(2)]
+    say(A * B - sum(c * c for c in V) != 8 and sum(F) ** 2 != 2 * sum(f * f for f in F),
+        "orientation H2 control: the pair satisfies neither the configuration's discriminant n(n+2) = 8 nor the power-null identity (exact)")
+
+
+# ---------- exact arithmetic over Q(sqrt 3): the rational obstruction at n = 3 ----------
+# det(W)^2 = det(T) / det(Q_n) = n 2^(n+3), a rational square only at n = 1, 2, 8, 9, ...; no rational
+# configuration exists at n = 3, but det(W) = 8 sqrt 3 there, and configurations over Q(sqrt 3) do.
+class R3:
+    """a + b sqrt 3 with Fraction a, b; a float operand raises, so no float can enter an exact check."""
+    __slots__ = ("a", "b")
+
+    def __init__(self, a, b=0):
+        if isinstance(a, float) or isinstance(b, float):
+            raise TypeError("float entered Q(sqrt 3)")
+        self.a, self.b = Fr(a), Fr(b)
+
+    @staticmethod
+    def of(o):
+        if isinstance(o, R3):
+            return o
+        if isinstance(o, (int, Fr)):
+            return R3(o)
+        raise TypeError(f"not exact: {type(o).__name__}")
+
+    def __add__(self, o):
+        o = R3.of(o)
+        return R3(self.a + o.a, self.b + o.b)
+    __radd__ = __add__
+
+    def __neg__(self):
+        return R3(-self.a, -self.b)
+
+    def __sub__(self, o):
+        return self + (-R3.of(o))
+
+    def __rsub__(self, o):
+        return R3.of(o) - self
+
+    def __mul__(self, o):
+        o = R3.of(o)
+        return R3(self.a * o.a + 3 * self.b * o.b, self.a * o.b + self.b * o.a)
+    __rmul__ = __mul__
+
+    def __truediv__(self, o):
+        o = R3.of(o)
+        nrm = o.a * o.a - 3 * o.b * o.b
+        if nrm == 0:
+            raise ZeroDivisionError("division by zero in Q(sqrt 3)")
+        return self * R3(o.a / nrm, -o.b / nrm)
+
+    def __rtruediv__(self, o):
+        return R3.of(o) / self
+
+    def __pow__(self, k):
+        out = R3(1)
+        for _ in range(k):
+            out = out * self
+        return out
+
+    def sign(self):
+        a, b = self.a, self.b
+        sa, sb = (a > 0) - (a < 0), (b > 0) - (b < 0)
+        if sa == sb or sb == 0:
+            return sa
+        if sa == 0:
+            return sb
+        return sa if a * a > 3 * b * b else sb
+
+    def __eq__(self, o):
+        if isinstance(o, float):
+            raise TypeError("float compared in Q(sqrt 3)")
+        if not isinstance(o, (R3, int, Fr)):
+            return NotImplemented
+        return (self - R3.of(o)).sign() == 0
+
+    def __hash__(self):
+        return hash((self.a, self.b))
+
+    def __lt__(self, o):
+        return (self - R3.of(o)).sign() < 0
+
+    def __gt__(self, o):
+        return (self - R3.of(o)).sign() > 0
+
+    def __le__(self, o):
+        return not self > o
+
+    def __ge__(self, o):
+        return not self < o
+
+    def __abs__(self):
+        return -self if self.sign() < 0 else self
+
+    def __float__(self):
+        return float(self.a) + float(self.b) * math.sqrt(3.0)
+
+    def __repr__(self):
+        return f"{self.a}+{self.b}*sqrt3"
+
+
+S3 = R3(0, 1)
+
+
+def exact_entry(c):
+    if isinstance(c, float):
+        raise TypeError("float in an exact row")
+    return c if isinstance(c, R3) else Fr(c)
+
+
+def rows_exact(objects):
+    return [[exact_entry(c) for c in (sphere_row(x, r) if kind == "sphere" else plane_row(x, r))]
+            for kind, x, r in objects]
+
+
+def all_exact(rows):
+    """No float anywhere (int entries, e.g. plane_row's curvature 0, are exact)."""
+    return all(isinstance(c, (int, Fr, R3)) and not isinstance(c, bool) for row in rows for c in row)
+
+
+def objs_n3_spheres():
+    # curvatures (-1, 2, 2, 3, 3): (sum b)^2 = 81 = 3 sum b^2; centres in Q(sqrt 3)^3
+    return [("sphere", [Fr(0)] * 3, Fr(-1)),
+            ("sphere", [Fr(1, 2), Fr(0), Fr(0)], Fr(1, 2)), ("sphere", [Fr(-1, 2), Fr(0), Fr(0)], Fr(1, 2)),
+            ("sphere", [Fr(0), S3 / 3, Fr(1, 3)], Fr(1, 3)), ("sphere", [Fr(0), S3 / 3, Fr(-1, 3)], Fr(1, 3))]
+
+
+def objs_n3_strip():
+    # three unit spheres on an equilateral triangle of side 2 between the oriented planes z = 1 and z = -1
+    return [("sphere", [Fr(0), Fr(0), Fr(0)], Fr(1)), ("sphere", [Fr(2), Fr(0), Fr(0)], Fr(1)),
+            ("sphere", [Fr(1), S3, Fr(0)], Fr(1)),
+            ("plane", [Fr(0), Fr(0), Fr(1)], Fr(1)), ("plane", [Fr(0), Fr(0), Fr(-1)], Fr(1))]
+
+
+def objs_alternatives():
+    """Hand-built families with the same ordered curvatures, NOT produced by transform_object."""
+    t2 = [Fr(3), Fr(-7, 2)]
+    alt_n2 = [("sphere", [t2[0], t2[1]], Fr(-1)),
+              ("sphere", [t2[0], t2[1] + Fr(1, 2)], Fr(1, 2)), ("sphere", [t2[0], t2[1] - Fr(1, 2)], Fr(1, 2)),
+              ("sphere", [t2[0] + Fr(2, 3), t2[1]], Fr(1, 3))]
+    alt_n1 = [("sphere", [Fr(6)], Fr(1)), ("sphere", [Fr(4)], Fr(1)), ("sphere", [Fr(5)], Fr(-2))]
+    alt_strip2 = [("sphere", [Fr(5), Fr(1)], Fr(1)), ("sphere", [Fr(5), Fr(3)], Fr(1)),
+                  ("plane", [Fr(-1), Fr(0)], Fr(-4)), ("plane", [Fr(1), Fr(0)], Fr(6))]
+    t3 = [Fr(5, 2), Fr(-1), Fr(3)]
+
+    def n3(zsign):
+        return [("sphere", list(t3), Fr(-1)),
+                ("sphere", [t3[0], t3[1] + Fr(1, 2), t3[2]], Fr(1, 2)),
+                ("sphere", [t3[0], t3[1] - Fr(1, 2), t3[2]], Fr(1, 2)),
+                ("sphere", [t3[0] + Fr(1, 3), t3[1], t3[2] + zsign * S3 / 3], Fr(1, 3)),
+                ("sphere", [t3[0] - Fr(1, 3), t3[1], t3[2] + zsign * S3 / 3], Fr(1, 3))]
+    return [("n=1 mirrored intervals", 1, [decode_row(w) for w in config_n1()], alt_n1),
+            ("n=2 quarter-turned circles", 2, [decode_row(w) for w in config_n2()], alt_n2),
+            ("n=2 strip turned upright", 2, [decode_row(w) for w in config_n2_two_planes()], alt_strip2),
+            ("n=3 spheres, a turned copy", 3, objs_n3_spheres(), n3(1)),
+            ("n=3 spheres, a mirrored copy", 3, objs_n3_spheres(), n3(-1))]
+
+
+def lean_parameters(n, W1, W2):
+    """Rigidity.lean's rigidMotion_parameters: O = (1/2) X^T Q X', t = -(1/4) a^T Q X'."""
+    Q = Qmat(n)
+    m = n + 2
+    X1 = [[W1[i][k + 2] for k in range(n)] for i in range(m)]
+    X2 = [[W2[i][k + 2] for k in range(n)] for i in range(m)]
+    a1 = [W1[i][0] for i in range(m)]
+    XtQX = matmul(matmul(transpose(X1), Q), X2)
+    O = [[XtQX[k][l] / 2 for l in range(n)] for k in range(n)]
+    aQX = matmul(matmul([a1], Q), X2)[0]
+    return O, [-aQX[l] / 4 for l in range(n)]
+
+
+def check_rigidity_desk():
+    # (a) the motion direction at n = 3 over Q(sqrt 3): a rational rotation and a signed permutation
+    rot3 = [[Fr(1, 3), Fr(2, 3), Fr(2, 3)], [Fr(2, 3), Fr(1, 3), Fr(-2, 3)], [Fr(-2, 3), Fr(2, 3), Fr(-1, 3)]]
+    sperm = [[Fr(0), Fr(-1), Fr(0)], [Fr(0), Fr(0), Fr(-1)], [Fr(-1), Fr(0), Fr(0)]]
+    say(matmul(transpose(rot3), rot3) == ident(3, Fr(1)) and matmul(transpose(sperm), sperm) == ident(3, Fr(1)) and
+        det_exact(rot3) == 1 and det_exact(sperm) == -1,
+        "desk rigidity n=3: (1/3)[[1,2,2],[2,1,-2],[-2,2,-1]] is a rotation (det 1), the signed permutation a reflection (det -1) (exact)")
+    t = [Fr(-5, 4), S3 / 2, Fr(7, 3)]
+    for cname, objects in (("spheres (-1,2,2,3,3)", objs_n3_spheres()), ("strip", objs_n3_strip())):
+        W = rows_exact(objects)
+        b = [w[1] for w in W]
+        say(identity_holds(W, 3)[0] and all_exact(W) and sum(b) ** 2 == 3 * sum(c * c for c in b) and
+            all(geometric_tangent(objects[i], objects[j]) for i in range(5) for j in range(5) if i != j),
+            f"desk rigidity n=3 {cname}: W^T Q_3 W = target and pairwise tangency over Q(sqrt 3) (exact)")
+        for oname, O in (("rotation", rot3), ("signed permutation", sperm)):
+            moved = [transform_object(obj, O, t) for obj in objects]
+            Wp = rows_exact(moved)
+            A, rO, rt = reconstruct_motion(3, W, Wp)
+            lO, lt = lean_parameters(3, W, Wp)
+            say(all_exact(A) and identity_holds(Wp, 3)[0] and A == rigid_motion_matrix(O, t) and
+                rO == O and rt == t and lO == O and lt == t,
+                f"desk rigidity n=3 {cname}, {oname}: W^-1 W' is the motion matrix; O, t by Rigidity.lean's formulas (exact over Q(sqrt 3))")
+    # (b) the congruence direction: two families built independently with equal curvatures
+    for label, n, objs, alt in objs_alternatives():
+        W, Wp = rows_exact(objs), rows_exact(alt)
+        m = n + 2
+        valid = (identity_holds(W, n)[0] and identity_holds(Wp, n)[0] and
+                 all(geometric_tangent(alt[i], alt[j]) for i in range(m) for j in range(m) if i != j))
+        same_b = [w[1] for w in W] == [w[1] for w in Wp]
+        A, rO, rt = reconstruct_motion(n, W, Wp)
+        lO, lt = lean_parameters(n, W, Wp)
+        orth = matmul(transpose(rO), rO) == ident(n, Fr(1))
+        motion = A == rigid_motion_matrix(rO, rt)
+        maps = all(transform_object(objs[i], rO, rt) == alt[i] for i in range(m))
+        say(valid and same_b and orth and motion and maps and lO == rO and lt == rt,
+            f"desk congruence {label}: equal curvatures force W^-1 W' to be a Euclidean motion mapping each object (exact)")
+    # (c) the curvature hypothesis is needed: the same spheres with two labels of unequal curvature swapped
+    objs = objs_n3_spheres()
+    swapped = [objs[0], objs[3], objs[2], objs[1], objs[4]]
+    W, Wp = rows_exact(objs), rows_exact(swapped)
+    A, rO, rt = reconstruct_motion(3, W, Wp)
+    say(identity_holds(Wp, 3)[0] and [w[1] for w in W] != [w[1] for w in Wp] and
+        matmul(transpose(rO), rO) != ident(3, Fr(1)) and A != rigid_motion_matrix(rO, rt),
+        "desk congruence control n=3: a relabelling with unequal curvatures is valid but not a motion (exact)")
+
+
+def tangency_point(a, b):
+    """The finite contact point of a tangent pair, or None for two parallel hyperplanes."""
+    if a[0] == "plane" and b[0] == "sphere":
+        a, b = b, a
+    if a[0] == "sphere" and b[0] == "sphere":
+        _, x, r = a
+        _, y, s = b
+        return [(s * p + r * q) / (r + s) for p, q in zip(x, y)]
+    if a[0] == "sphere" and b[0] == "plane":
+        _, x, r = a
+        _, h, _ = b
+        return [p + r * q for p, q in zip(x, h)]
+    return None
+
+
+def desk_configurations():
+    """Every family the checks below use: exact (Q or Q(sqrt 3)) and float, the random ones under their own seed."""
+    out = [("n=1", 1, config_n1(), True), ("n=2", 2, config_n2(), True), ("n=2 strip", 2, config_n2_two_planes(), True),
+           ("n=3 spheres", 3, rows_exact(objs_n3_spheres()), True), ("n=3 strip", 3, rows_exact(objs_n3_strip()), True)]
+    for n in range(1, 8):
+        out.append((f"W0({n})", n, base_config(n), False))
+    saved = random.getstate()
+    random.seed(20261011)
+    for n in range(1, 8):
+        exact = n <= 2
+        W0 = {1: config_n1(), 2: config_n2()}.get(n) if exact else base_config(n)
+        for trial in range(3):
+            out.append((f"reflected n={n} #{trial}", n, random_config(n, exact), exact))
+            b = random_null_exact(n)
+            out.append((f"completed n={n} #{trial}", n,
+                        complete_from_curvatures(n, b if exact else [float(c) for c in b], W0, exact), exact))
+    random.setstate(saved)
+    return out
+
+
+def check_total_curvature_and_contacts():
+    for label, n, W, exact in desk_configurations():
+        m = n + 2
+        A = sum(w[0] for w in W)
+        B = sum(w[1] for w in W)
+        V = [sum(w[k + 2] for w in W) for k in range(n)]
+        scale = max(1.0, max(abs(float(c)) for w in W for c in w))
+        disc = A * B - sum(c * c for c in V)
+        mode = "exact" if exact else "float"
+        if exact:
+            ok = identity_holds(W, n)[0] and all_exact(W) and B != 0 and disc == n * (n + 2)
+        else:
+            ok = (identity_holds(W, n, exact=False, tol=1e-9 * scale ** 2)[0] and abs(B) > 1e-6 and
+                  abs(disc - n * (n + 2)) < 1e-7 * scale ** 2)
+        say(ok, f"desk B != 0 on {label}: B = {float(B):.4g}, AB - |V|^2 = n(n+2) ({mode})")
+        dec = [decode_row(w, exact=exact, tol=1e-9 * scale) for w in W]
+        planes = sum(d_[0] == "plane" for d_ in dec)
+        tol = 1e-7 * scale ** 2
+        pts, bad = [], []
+        for i in range(m):
+            for j in range(i + 1, m):
+                p = tangency_point(dec[i], dec[j])
+                if p is None:
+                    continue
+                pw = [row_power(W[k], p) for k in range(m)]
+                on_ij = (pw[i] == 0 and pw[j] == 0) if exact else (abs(pw[i]) < tol and abs(pw[j]) < tol)
+                off = all((pw[k] != 0) if exact else abs(pw[k]) > tol for k in range(m) if k not in (i, j))
+                if not (on_ij and off):
+                    bad.append((i, j))
+                pts.append(p)
+        distinct = all(any((p != q) if exact else abs(p - q) > 1e-7 * scale for p, q in zip(pts[a], pts[c]))
+                       for a in range(len(pts)) for c in range(a + 1, len(pts)))
+        npairs = m * (m - 1) // 2 - (1 if planes == 2 else 0)
+        say(planes <= 2 and len(pts) == npairs and npairs > 0 and not bad and distinct,
+            f"desk no three boundaries on {label}: {len(pts)} finite contacts, each on exactly two boundaries, "
+            f"pairwise distinct; {planes} hyperplane rows ({mode})")
+
+
+def check_raw_interiors_control():
+    # a B < 0 family satisfies the identity, but its raw interiors overlap; multiplying by B separates them
+    cases = (("n=2 reversed (-1,2,2,3)", 2, [decode_row(w) for w in config_n2()], [Fr(0), Fr(-1, 2)]),
+             ("n=3 reversed (-1,2,2,3,3)", 3, objs_n3_spheres(), [Fr(0), Fr(-1, 2), Fr(0)]))
+    for label, n, objs, y in cases:
+        rev = [reverse_object(o) for o in objs]
+        W = rows_exact(rev)
+        B = sum(w[1] for w in W)
+        F = [row_power(w, y) for w in W]
+        raw = sum(geometric_interior(o, y) for o in rev)
+        say(identity_holds(W, n)[0] and B < 0 and raw >= 2 and sum(f < 0 for f in F) == raw and
+            sum(B * f < 0 for f in F) <= 1,
+            f"desk control {label}: B = {B}; the point {[str(c) for c in y]} lies in {raw} raw interiors "
+            f"and in at most one after the B-normalization (exact)")
+
+
+def check_rational_obstruction():
+    # det(W)^2 = det(T) / det(Q_n) = n 2^(n+3): a rational square at n = 1, 2, never at n = 3..7
+    for n in range(1, 8):
+        d2 = det_exact([[Fr(c) for c in row] for row in target(n)]) / det_exact(Qmat(n))
+        r = math.isqrt(int(d2)) if d2.denominator == 1 and d2 >= 0 else -1
+        square = r >= 0 and r * r == d2
+        say(d2 == n * 2 ** (n + 3) and square == (n <= 2),
+            f"desk obstruction n={n}: det(W)^2 = n 2^(n+3) = {d2}, " +
+            ("a rational square" if square else "not a rational square, so no configuration has rational rows") + " (exact)")
+
+
 if __name__ == "__main__":
     check_exact_configs()
     check_inverses()
@@ -552,6 +1066,12 @@ if __name__ == "__main__":
     check_sphere_bridge()
     check_remaining()
     check_control()
+    check_rigidity()
+    check_orientation()
+    check_rational_obstruction()
+    check_rigidity_desk()
+    check_total_curvature_and_contacts()
+    check_raw_interiors_control()
     print(f"{len(FAILS)} failures")
     print(f"VERDICT: {'PASS' if not FAILS else 'FAIL'}")
     sys.exit(0 if not FAILS else 1)
