@@ -121,6 +121,35 @@ theorem sphere_soddy_gosset_internal {n : ℕ} (hn : 0 < n)
     (∑ i, 1 / (s i).radius) ^ 2 = n * ∑ i, (1 / (s i).radius) ^ 2 :=
   soddy_gosset_internal hn _ _ (cor_pairwiseTangent_of_ext s hr ht)
 
+/-- One enclosing sphere `e` (internally tangent to the others) and the others pairwise externally
+tangent give `PairwiseTangent` with the signed radius `−rₑ` at `e`. -/
+theorem cor_pairwiseTangent_enclosing {n : ℕ}
+    (s : Fin (n + 2) → EuclideanGeometry.Sphere (EuclideanSpace ℝ (Fin n))) (e : Fin (n + 2))
+    (hr : ∀ i, 0 < (s i).radius)
+    (hint : ∀ j, j ≠ e → EuclideanGeometry.Sphere.IsIntTangent (s j) (s e))
+    (hext : ∀ i j, i ≠ e → j ≠ e → i ≠ j → EuclideanGeometry.Sphere.IsExtTangent (s i) (s j)) :
+    PairwiseTangent (fun i => (s i).center)
+      (fun i => if i = e then -(s i).radius else (s i).radius) := by
+  refine ⟨fun i => ?_, fun i j hij => ?_⟩
+  · have := (hr i).ne'
+    dsimp only
+    split_ifs <;> simp [this]
+  · by_cases hi : i = e
+    · subst hi
+      have hj : j ≠ i := fun hji => hij hji.symm
+      have hd := (hint j hj).dist_center
+      simp only [↓reduceIte, hj]
+      rw [dist_comm, hd]
+      ring
+    · by_cases hj : j = e
+      · subst hj
+        have hd := (hint i hi).dist_center
+        simp only [↓reduceIte, hi]
+        rw [hd]
+        ring
+      · simp only [hi, hj, ↓reduceIte]
+        rw [(hext i j hi hj hij).dist_center]
+
 /-- Soddy–Gosset with one enclosing sphere `e`, to which the others are internally tangent and which
 carries the curvature `−1/rₑ`. -/
 theorem sphere_soddy_gosset_enclosing_internal {n : ℕ} (hn : 0 < n)
@@ -130,27 +159,7 @@ theorem sphere_soddy_gosset_enclosing_internal {n : ℕ} (hn : 0 < n)
     (hext : ∀ i j, i ≠ e → j ≠ e → i ≠ j → EuclideanGeometry.Sphere.IsExtTangent (s i) (s j)) :
     (∑ i, (if i = e then -1 else 1) / (s i).radius) ^ 2 =
       n * ∑ i, ((if i = e then -1 else 1) / (s i).radius) ^ 2 := by
-  have hPT : PairwiseTangent (fun i => (s i).center)
-      (fun i => if i = e then -(s i).radius else (s i).radius) := by
-    refine ⟨fun i => ?_, fun i j hij => ?_⟩
-    · have := (hr i).ne'
-      dsimp only
-      split_ifs <;> simp [this]
-    · by_cases hi : i = e
-      · subst hi
-        have hj : j ≠ i := fun hji => hij hji.symm
-        have hd := (hint j hj).dist_center
-        simp only [↓reduceIte, hj]
-        rw [dist_comm, hd]
-        ring
-      · by_cases hj : j = e
-        · subst hj
-          have hd := (hint i hi).dist_center
-          simp only [↓reduceIte, hi]
-          rw [hd]
-          ring
-        · simp only [hi, hj, ↓reduceIte]
-          rw [(hext i j hi hj hij).dist_center]
+  have hPT := cor_pairwiseTangent_enclosing s e hr hint hext
   have key := soddy_gosset_internal hn _ _ hPT
   have hc : ∀ i, 1 / (if i = e then -(s i).radius else (s i).radius) =
       (if i = e then -1 else 1) / (s i).radius := by
@@ -167,5 +176,18 @@ theorem sphere_augmented_descartes_internal {n : ℕ} (hn : 0 < n)
     (augmentedMatrix (fun i => (s i).center) (fun i => (s i).radius))ᵀ * descartesQ n *
       augmentedMatrix (fun i => (s i).center) (fun i => (s i).radius) = augmentedTarget n :=
   augmented_descartes_internal hn _ _ (cor_pairwiseTangent_of_ext s hr ht)
+
+/-- The augmented identity for Mathlib's spheres with one enclosing sphere `e`, whose row is taken with
+the signed radius `−rₑ`. -/
+theorem cor_sphere_augmented_descartes_enclosing {n : ℕ} (hn : 0 < n)
+    (s : Fin (n + 2) → EuclideanGeometry.Sphere (EuclideanSpace ℝ (Fin n))) (e : Fin (n + 2))
+    (hr : ∀ i, 0 < (s i).radius)
+    (hint : ∀ j, j ≠ e → EuclideanGeometry.Sphere.IsIntTangent (s j) (s e))
+    (hext : ∀ i j, i ≠ e → j ≠ e → i ≠ j → EuclideanGeometry.Sphere.IsExtTangent (s i) (s j)) :
+    (augmentedMatrix (fun i => (s i).center)
+        (fun i => if i = e then -(s i).radius else (s i).radius))ᵀ * descartesQ n *
+      augmentedMatrix (fun i => (s i).center)
+        (fun i => if i = e then -(s i).radius else (s i).radius) = augmentedTarget n :=
+  augmented_descartes_internal hn _ _ (cor_pairwiseTangent_enclosing s e hr hint hext)
 
 end AugmentedDescartes
