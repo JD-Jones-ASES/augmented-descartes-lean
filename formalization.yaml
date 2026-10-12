@@ -2,7 +2,7 @@
 version: "v0.4"
 
 project:
-  name: "The augmented Descartes theorem in every dimension, W^T Q_n W = [[0,-4,0],[-4,0,0],[0,0,2I_n]] for n + 2 tangent oriented spheres and hyperplanes, its converse, both halves of Soddy-Gosset's converse, compatible orientations, the curvature-centre converse (nonzero first column), Soddy's two spheres"
+  name: "The augmented Descartes theorem in every dimension, its converses, and Soddy's two spheres"
   description: >-
     A Lean 4 development of Section 3 of Lagarias, Mallows and Wilks, Beyond the Descartes circle theorem
     (Amer. Math. Monthly 109 (2002) 338-361), in the Lorentz form. An oriented sphere in R^n with centre x and
